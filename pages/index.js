@@ -19,7 +19,7 @@ const Home = () => {
   const [fullScrren, setFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [crazyMode, setCrazyMode] = useState(false);
-  const [crazyModeInterval, setCrazyModeInterval] = useState(null);
+  const [crazyModeInterval, setCrazyModeInterval] = useState(100);
 
   useEffect(() => {
     if (fullScrren) {
@@ -123,7 +123,7 @@ const Home = () => {
       ) : (
         <div className='flex flex-row items-end justify-end p-4  bg-black bg-opacity-10 rounded-md mx-1'>
           <EyeIcon
-            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+            className='h-7 w-7 text-slate-700 cursor-pointer hover:text-slate-500'
             onClick={() => setShowControls(!showControls)}
           />
         </div>
