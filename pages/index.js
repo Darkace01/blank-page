@@ -8,6 +8,8 @@ const Home = () => {
   const [color, setColor] = useState('#000000');
   const [fullScrren, setFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [crazyMode, setCrazyMode] = useState(false);
+  const [crazyModeInterval, setCrazyModeInterval] = useState(null);
 
   useEffect(() => {
     if (fullScrren) {
@@ -16,6 +18,15 @@ const Home = () => {
       exitFullscreen();
     }
   }, [fullScrren]);
+
+  useEffect(() => {
+    if (crazyMode) {
+      const interval = setInterval(() => {
+        setColor(randomColor());
+      }, crazyModeInterval);
+      return () => clearInterval(interval);
+    }
+  }, [crazyMode, crazyModeInterval]);
 
   const requestFullScreen = () => {
     var elem = document.documentElement;
@@ -67,6 +78,21 @@ const Home = () => {
           >
             {fullScrren ? 'Exit Full Screen' : 'Full Screen'}
           </button>
+          <button
+            className='bg-white text-black p-1 rounded-md '
+            onClick={() => setCrazyMode(!crazyMode)}
+          >
+            {crazyMode ? 'Exit Crazy Mode' : 'Crazy Mode'}
+          </button>
+          {crazyMode && (
+            <input
+              type='range'
+              min='100'
+              max='1000'
+              value={crazyModeInterval}
+              onChange={(e) => setCrazyModeInterval(e.target.value)}
+            />
+          )}
           <button
             className='bg-white text-black p-1 rounded-md '
             onClick={() => setShowControls(!showControls)}
