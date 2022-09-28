@@ -69,12 +69,12 @@ const Home = () => {
     >
       {showControls ? (
         <div className='flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
-          <h1 className='text-white flex lg:flex md:flex sm:hidden align-middle '>
-            Change Color:
+          <h1 className=' text-white align-middle'>
+            <span className='hidden sm:inline'>Change Color: </span>
+            <span className='bg-black p-1 bg-opacity-10 rounded-md'>
+              {color}
+            </span>{' '}
           </h1>
-          <span className='bg-black p-1 bg-opacity-10 rounded-md text-white'>
-            {color}
-          </span>
           <LightBulbIcon
             className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
             onClick={() => setColor(randomColor())}
