@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  ArrowsPointingOutIcon,
+  ArrowsPointingInIcon,
+  ArrowPathIcon,
+  LightBulbIcon,
+  VariableIcon,
+  StopIcon,
+} from '@heroicons/react/24/outline';
 
 const randomColor = () => {
   let randomColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -66,48 +75,55 @@ const Home = () => {
               {color}
             </span>{' '}
           </h1>
-          <button
-            className='bg-white text-black p-1 rounded-md '
+          <LightBulbIcon
+            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
             onClick={() => setColor(randomColor())}
-          >
-            Random Color
-          </button>
-          <button
-            className='bg-white text-black p-1 rounded-md '
+          />
+          <ArrowPathIcon
+            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
             onClick={() => setColor('#000000')}
-          >
-            Reset Color
-          </button>
-          <button
-            className='bg-white text-black p-1 rounded-md '
-            onClick={() => setFullScreen(!fullScrren)}
-          >
-            {fullScrren ? 'Exit Full Screen' : 'Full Screen'}
-          </button>
-          <button
-            className='bg-white text-black p-1 rounded-md '
-            onClick={() => setCrazyMode(!crazyMode)}
-          >
-            {crazyMode ? 'Exit Crazy Mode' : 'Crazy Mode'}
-          </button>
-          {crazyMode && (
-            <input
-              type='range'
-              min='100'
-              max='1000'
-              value={crazyModeInterval}
-              onChange={(e) => setCrazyModeInterval(e.target.value)}
+          />
+          {fullScrren ? (
+            <ArrowsPointingInIcon
+              className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+              onClick={() => setFullScreen(!fullScrren)}
+            />
+          ) : (
+            <ArrowsPointingOutIcon
+              className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+              onClick={() => setFullScreen(!fullScrren)}
+            />
+          )}
+          {crazyMode ? (
+            <>
+              <StopIcon
+                className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+                onClick={() => setCrazyMode(!crazyMode)}
+              />
+              <input
+                type='range'
+                min='100'
+                max='1000'
+                value={crazyModeInterval}
+                className='text-white cursor-pointer hover:text-slate-500'
+                onChange={(e) => setCrazyModeInterval(e.target.value)}
+              />
+            </>
+          ) : (
+            <VariableIcon
+              className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+              onClick={() => setCrazyMode(!crazyMode)}
             />
           )}
           <EyeSlashIcon
-            className='h-7 w-7 text-white'
+            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
             onClick={() => setShowControls(!showControls)}
           />
         </div>
       ) : (
         <div className='flex flex-row items-end justify-end p-4  bg-black bg-opacity-10 rounded-md mx-1'>
           <EyeIcon
-            className='h-7 w-7 text-white'
+            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
             onClick={() => setShowControls(!showControls)}
           />
         </div>
