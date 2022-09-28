@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 const randomColor = () => {
   let randomColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -54,17 +55,22 @@ const Home = () => {
   };
   return (
     <div
-      className='h-full w-full min-h-screen'
+      className='h-full w-full min-h-screen p-1'
       style={{ backgroundColor: color }} //{`background-color: ${color}`}
     >
       {showControls ? (
-        <div className='flex flex-row items-end justify-end p-4 flex-wrap space-x-2 space-y-2'>
-          <h1 className=' text-white'>Change Color</h1>
+        <div className='flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
+          <h1 className=' text-white align-middle'>
+            Change Color:{' '}
+            <span className='bg-black p-1 bg-opacity-10 rounded-md'>
+              {color}
+            </span>{' '}
+          </h1>
           <button
             className='bg-white text-black p-1 rounded-md '
             onClick={() => setColor(randomColor())}
           >
-            {color}
+            Random Color
           </button>
           <button
             className='bg-white text-black p-1 rounded-md '
@@ -93,21 +99,17 @@ const Home = () => {
               onChange={(e) => setCrazyModeInterval(e.target.value)}
             />
           )}
-          <button
-            className='bg-white text-black p-1 rounded-md '
+          <EyeSlashIcon
+            className='h-7 w-7 text-white'
             onClick={() => setShowControls(!showControls)}
-          >
-            Hide Controls
-          </button>
+          />
         </div>
       ) : (
-        <div className='flex flex-row items-end justify-end p-4'>
-          <button
-            className='bg-slate-800 text-black p-1 rounded-md '
+        <div className='flex flex-row items-end justify-end p-4  bg-black bg-opacity-10 rounded-md mx-1'>
+          <EyeIcon
+            className='h-7 w-7 text-white'
             onClick={() => setShowControls(!showControls)}
-          >
-            Show Controls
-          </button>
+          />
         </div>
       )}
     </div>
