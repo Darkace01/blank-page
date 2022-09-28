@@ -47,28 +47,28 @@ const Home = () => {
       style={{ backgroundColor: color }} //{`background-color: ${color}`}
     >
       {showControls ? (
-        <div className='flex flex-row items-end justify-end p-4'>
+        <div className='flex flex-row items-end justify-end p-4 flex-wrap space-x-2 space-y-2'>
           <h1 className=' text-white'>Change Color</h1>
           <button
-            className='bg-white text-black p-1 rounded-md ml-2'
+            className='bg-white text-black p-1 rounded-md '
             onClick={() => setColor(randomColor())}
           >
             {color}
           </button>
           <button
-            className='bg-white text-black p-1 rounded-md ml-2'
+            className='bg-white text-black p-1 rounded-md '
             onClick={() => setColor('#000000')}
           >
             Reset Color
           </button>
           <button
-            className='bg-white text-black p-1 rounded-md ml-2'
+            className='bg-white text-black p-1 rounded-md '
             onClick={() => setFullScreen(!fullScrren)}
           >
             {fullScrren ? 'Exit Full Screen' : 'Full Screen'}
           </button>
           <button
-            className='bg-white text-black p-1 rounded-md ml-2'
+            className='bg-white text-black p-1 rounded-md '
             onClick={() => setShowControls(!showControls)}
           >
             Hide Controls
@@ -77,7 +77,7 @@ const Home = () => {
       ) : (
         <div className='flex flex-row items-end justify-end p-4'>
           <button
-            className='bg-slate-800 text-black p-1 rounded-md ml-2'
+            className='bg-slate-800 text-black p-1 rounded-md '
             onClick={() => setShowControls(!showControls)}
           >
             Show Controls
