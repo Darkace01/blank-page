@@ -59,12 +59,22 @@ const Home = ({ content, author }) => {
   };
 
   useEffect(() => {
+    if (isIOSDevice()) {
+      alert(
+        'Full screen mode is not supported on iOS devices. Please use a desktop browser to use this feature.'
+      );
+      return;
+    }
     if (fullScrren) {
       requestFullScreen();
     } else {
       exitFullscreen();
     }
   }, [fullScrren]);
+
+  const isIOSDevice = () => {
+    return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+  };
 
   useEffect(() => {
     if (crazyMode) {
