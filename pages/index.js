@@ -60,7 +60,7 @@ const Home = ({ content, author }) => {
 
   useEffect(() => {
     if (isIOSDevice()) {
-      alert(
+      console.log(
         'Full screen mode is not supported on iOS devices. Please use a desktop browser to use this feature.'
       );
       return;
@@ -119,6 +119,13 @@ const Home = ({ content, author }) => {
       setFetchRandomQuote(true);
     }
   };
+
+  const toggleFullScreen = () => {
+    alert(
+      'Full screen mode is not supported on iOS devices. Please use a desktop browser to use this feature.'
+    );
+    setFullScreen(!fullScrren);
+  };
   return (
     <>
       <Head>
@@ -165,13 +172,13 @@ const Home = ({ content, author }) => {
             {fullScrren ? (
               <ArrowsPointingInIcon
                 className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-                onClick={() => setFullScreen(!fullScrren)}
+                onClick={toggleFullScreen}
                 title='Exit Full Screen'
               />
             ) : (
               <ArrowsPointingOutIcon
                 className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-                onClick={() => setFullScreen(!fullScrren)}
+                onClick={toggleFullScreen}
                 title='Full Screen'
               />
             )}
