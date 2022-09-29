@@ -121,9 +121,12 @@ const Home = ({ content, author }) => {
   };
 
   const toggleFullScreen = () => {
-    alert(
-      'Full screen mode is not supported on iOS devices. Please use a desktop browser to use this feature.'
-    );
+    if (isIOSDevice()) {
+      alert(
+        'Full screen mode is not supported on your device. Please use a supported browser to use this feature.'
+      );
+      return;
+    }
     setFullScreen(!fullScrren);
   };
   return (
