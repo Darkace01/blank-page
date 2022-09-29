@@ -9,17 +9,48 @@ import {
   VariableIcon,
   StopIcon,
 } from '@heroicons/react/24/outline';
-
+import QuoteCard from '../components/QuoteCard';
+import axios from 'axios';
+import { RANDOM_QUOTES_URL } from '../lib/helpers';
 const randomColor = () => {
   let randomColor = Math.floor(Math.random() * 16777215).toString(16);
   return `#${randomColor}`;
 };
-const Home = () => {
+
+const Home = ({ content, author }) => {
   const [color, setColor] = useState('#000000');
   const [fullScrren, setFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [crazyMode, setCrazyMode] = useState(false);
   const [crazyModeInterval, setCrazyModeInterval] = useState(100);
+  const [randomQuote, setRandomQuote] = useState({ content, author });
+  const [fetchRandomQuote, setFetchRandomQuote] = useState(false);
+  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
+  const [isErrorQuote, setIsErrorQuote] = useState(false);
+
+  useEffect(() => {
+    if (fetchRandomQuote) {
+      setIsLoadingQuote(true);
+      setIsErrorQuote(false);
+      const getRandomQuote = async () => {
+        try {
+          const res = await axios.get(RANDOM_QUOTES_URL);
+          if (res.data) {
+            const { content, author } = res.data;
+            setRandomQuote({ content, author });
+            setIsLoadingQuote(false);
+          }
+        } catch (error) {
+          console.log('error', error);
+          setIsErrorQuote(true);
+          setIsLoadingQuote(false);
+        }
+      };
+
+      getRandomQuote();
+    }
+    setFetchRandomQuote(false);
+  }, [fetchRandomQuote]);
 
   useEffect(() => {
     if (fullScrren) {
@@ -62,6 +93,11 @@ const Home = () => {
       document.msExitFullscreen();
     }
   };
+
+  const randomMode = () => {
+    setColor(randomColor());
+    setFetchRandomQuote(true);
+  };
   return (
     <div
       className='h-full w-full min-h-screen p-1'
@@ -77,7 +113,7 @@ const Home = () => {
           </h1>
           <LightBulbIcon
             className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-            onClick={() => setColor(randomColor())}
+            onClick={randomMode}
           />
           <ArrowPathIcon
             className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
@@ -128,8 +164,26 @@ const Home = () => {
           />
         </div>
       )}
+      <div className='align-middle items-center justify-center flex min-h-[80vh]'>
+        <QuoteCard
+          randomQuote={randomQuote}
+          isLoading={isLoadingQuote}
+          isError={isErrorQuote}
+        />
+      </div>
     </div>
   );
 };
 
+export async function getStaticProps() {
+  const res = await axios.get(RANDOM_QUOTES_URL);
+  const { content, author } = res.data;
+
+  return {
+    props: {
+      content,
+      author,
+    }, // will be passed to the page component as props
+  };
+}
 export default Home;
