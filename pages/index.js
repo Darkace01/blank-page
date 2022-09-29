@@ -14,6 +14,7 @@ import QuoteCard from '../components/QuoteCard';
 import axios from 'axios';
 import { RANDOM_QUOTES_URL } from '../lib/helpers';
 import FooterCredit from '../components/FooterCredit';
+import Head from 'next/head';
 const randomColor = () => {
   let randomColor = Math.floor(Math.random() * 16777215).toString(16);
   return `#${randomColor}`;
@@ -109,85 +110,107 @@ const Home = ({ content, author }) => {
     }
   };
   return (
-    <div
-      className='h-full w-full min-h-screen p-1 relative'
-      style={{ backgroundColor: color }} //{`background-color: ${color}`}
-    >
-      {showControls ? (
-        <div className='flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
-          <h1 className=' text-white align-middle'>
-            <span className='bg-black p-1 bg-opacity-10 rounded-md'>
-              {color}
-            </span>{' '}
-          </h1>
-          <LightBulbIcon
-            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-            onClick={randomMode}
-          />
-          <ArrowPathIcon
-            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-            onClick={() => setColor('#000000')}
-          />
-          <ChatBubbleOvalLeftIcon
-            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-            onClick={() => setShowQuote(!showQuote)}
-          />
-          {fullScrren ? (
-            <ArrowsPointingInIcon
+    <>
+      <Head>
+        <title>Blank Page</title>
+        <meta
+          name='viewport'
+          content='width=device-width, initial-scale=1'
+        ></meta>
+        <meta
+          name='description'
+          content='This was created out of frustration of not wanting to turn off my second monitor when I just want to focus on one screen. It"s a simple app that would fill your second monitor with a black screen. It also has some fun feature to change the color randomly and also a fun mode to do that continuously.'
+        />
+      </Head>
+      <div
+        className='h-full w-full min-h-screen p-1 relative'
+        style={{ backgroundColor: color }} //{`background-color: ${color}`}
+      >
+        {showControls ? (
+          <div className='flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
+            <h1 className=' text-white align-middle'>
+              <span className='bg-black p-1 bg-opacity-10 rounded-md'>
+                {color}
+              </span>{' '}
+            </h1>
+            <LightBulbIcon
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-              onClick={() => setFullScreen(!fullScrren)}
+              onClick={randomMode}
+              title='Random Color'
             />
-          ) : (
-            <ArrowsPointingOutIcon
+            <ArrowPathIcon
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-              onClick={() => setFullScreen(!fullScrren)}
+              onClick={() => setColor('#000000')}
+              title='Black'
             />
-          )}
-          {crazyMode ? (
-            <>
-              <StopIcon
+            <ChatBubbleOvalLeftIcon
+              className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+              onClick={() => setShowQuote(!showQuote)}
+              title='Show Quote'
+            />
+            {fullScrren ? (
+              <ArrowsPointingInIcon
+                className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+                onClick={() => setFullScreen(!fullScrren)}
+                title='Exit Full Screen'
+              />
+            ) : (
+              <ArrowsPointingOutIcon
+                className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+                onClick={() => setFullScreen(!fullScrren)}
+                title='Full Screen'
+              />
+            )}
+            {crazyMode ? (
+              <>
+                <StopIcon
+                  className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+                  onClick={() => setCrazyMode(!crazyMode)}
+                  title='Stop Crazy Mode'
+                />
+                <input
+                  type='range'
+                  min='100'
+                  max='10000'
+                  value={crazyModeInterval}
+                  className='text-white cursor-pointer hover:text-slate-500'
+                  onChange={(e) => setCrazyModeInterval(e.target.value)}
+                />
+              </>
+            ) : (
+              <VariableIcon
                 className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
                 onClick={() => setCrazyMode(!crazyMode)}
+                title='Crazy Mode'
               />
-              <input
-                type='range'
-                min='100'
-                max='10000'
-                value={crazyModeInterval}
-                className='text-white cursor-pointer hover:text-slate-500'
-                onChange={(e) => setCrazyModeInterval(e.target.value)}
-              />
-            </>
-          ) : (
-            <VariableIcon
+            )}
+            <EyeSlashIcon
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-              onClick={() => setCrazyMode(!crazyMode)}
+              onClick={() => setShowControls(!showControls)}
+              title='Hide Controls'
             />
-          )}
-          <EyeSlashIcon
-            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-            onClick={() => setShowControls(!showControls)}
-          />
-        </div>
-      ) : (
-        <div className='flex flex-row items-end justify-end p-4  bg-black bg-opacity-10 rounded-md mx-1'>
-          <EyeIcon
-            className='h-7 w-7 text-slate-700 cursor-pointer hover:text-slate-500'
-            onClick={() => setShowControls(!showControls)}
-          />
-        </div>
-      )}
-      {showQuote && (
-        <div className='align-middle items-center justify-center flex min-h-[80vh]'>
-          <QuoteCard
-            randomQuote={randomQuote}
-            isLoading={isLoadingQuote}
-            isError={isErrorQuote}
-          />
-        </div>
-      )}
-      <FooterCredit />
-    </div>
+          </div>
+        ) : (
+          <div className='flex flex-row items-end justify-end p-4  bg-black bg-opacity-10 rounded-md mx-1'>
+            <EyeIcon
+              className='h-7 w-7 text-slate-700 cursor-pointer hover:text-slate-500'
+              onClick={() => setShowControls(!showControls)}
+              title='Show Controls'
+            />
+          </div>
+        )}
+        {showQuote && (
+          <div className='align-middle items-center justify-center flex min-h-[80vh]'>
+            <QuoteCard
+              randomQuote={randomQuote}
+              isLoading={isLoadingQuote}
+              isError={isErrorQuote}
+            />
+          </div>
+        )}
+        <FooterCredit />
+      </div>
+    </>
   );
 };
 
