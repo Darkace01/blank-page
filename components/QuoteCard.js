@@ -2,7 +2,6 @@ import React from 'react';
 
 function QuoteCard({ randomQuote }, isLoadingQuote, isError) {
   const { content, author } = randomQuote;
-  console.log('error', isError);
   if (isError)
     return (
       <>
