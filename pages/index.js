@@ -121,6 +121,10 @@ const Home = ({ content, author }) => {
           name='description'
           content='This was created out of frustration of not wanting to turn off my second monitor when I just want to focus on one screen. It"s a simple app that would fill your second monitor with a black screen. It also has some fun feature to change the color randomly and also a fun mode to do that continuously.'
         />
+        <meta
+          name='google-site-verification'
+          content='63h6sakCIa6MwD-3KSfTqhDAXozANjDTYpoe1N531nM'
+        />
       </Head>
       <div
         className='h-full w-full min-h-screen p-1 relative'
