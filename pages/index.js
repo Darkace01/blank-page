@@ -32,25 +32,25 @@ const Home = ({ content, author }) => {
     if (fetchRandomQuote) {
       setIsLoadingQuote(true);
       setIsErrorQuote(false);
-      const getRandomQuote = async () => {
-        try {
-          const res = await axios.get(RANDOM_QUOTES_URL);
-          if (res.data) {
-            const { content, author } = res.data;
-            setRandomQuote({ content, author });
-            setIsLoadingQuote(false);
-          }
-        } catch (error) {
-          console.log('error', error);
-          setIsErrorQuote(true);
-          setIsLoadingQuote(false);
-        }
-      };
 
       getRandomQuote();
     }
     setFetchRandomQuote(false);
   }, [fetchRandomQuote]);
+  const getRandomQuote = async () => {
+    try {
+      const res = await axios.get(RANDOM_QUOTES_URL);
+      if (res.data) {
+        const { content, author } = res.data;
+        setRandomQuote({ content, author });
+        setIsLoadingQuote(false);
+      }
+    } catch (error) {
+      console.log('error', error);
+      setIsErrorQuote(true);
+      setIsLoadingQuote(false);
+    }
+  };
 
   useEffect(() => {
     if (fullScrren) {
@@ -64,6 +64,7 @@ const Home = ({ content, author }) => {
     if (crazyMode) {
       const interval = setInterval(() => {
         setColor(randomColor());
+        getRandomQuote();
       }, crazyModeInterval);
       return () => clearInterval(interval);
     }
