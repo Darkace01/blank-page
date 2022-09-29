@@ -25,7 +25,7 @@ const Home = ({ content, author }) => {
   const [fullScrren, setFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [crazyMode, setCrazyMode] = useState(false);
-  const [crazyModeInterval, setCrazyModeInterval] = useState(100);
+  const [crazyModeInterval, setCrazyModeInterval] = useState(500);
   const [showQuote, setShowQuote] = useState(false);
   const [randomQuote, setRandomQuote] = useState({ content, author });
   const [fetchRandomQuote, setFetchRandomQuote] = useState(false);
