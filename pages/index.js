@@ -13,6 +13,7 @@ import {
 import QuoteCard from '../components/QuoteCard';
 import axios from 'axios';
 import { RANDOM_QUOTES_URL } from '../lib/helpers';
+import FooterCredit from '../components/FooterCredit';
 const randomColor = () => {
   let randomColor = Math.floor(Math.random() * 16777215).toString(16);
   return `#${randomColor}`;
@@ -109,13 +110,12 @@ const Home = ({ content, author }) => {
   };
   return (
     <div
-      className='h-full w-full min-h-screen p-1'
+      className='h-full w-full min-h-screen p-1 relative'
       style={{ backgroundColor: color }} //{`background-color: ${color}`}
     >
       {showControls ? (
         <div className='flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
           <h1 className=' text-white align-middle'>
-            <span className='hidden sm:inline'>Change Color: </span>
             <span className='bg-black p-1 bg-opacity-10 rounded-md'>
               {color}
             </span>{' '}
@@ -186,6 +186,7 @@ const Home = ({ content, author }) => {
           />
         </div>
       )}
+      <FooterCredit />
     </div>
   );
 };
