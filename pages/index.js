@@ -8,6 +8,7 @@ import {
   LightBulbIcon,
   VariableIcon,
   StopIcon,
+  ChatBubbleOvalLeftIcon,
 } from '@heroicons/react/24/outline';
 import QuoteCard from '../components/QuoteCard';
 import axios from 'axios';
@@ -23,19 +24,22 @@ const Home = ({ content, author }) => {
   const [showControls, setShowControls] = useState(true);
   const [crazyMode, setCrazyMode] = useState(false);
   const [crazyModeInterval, setCrazyModeInterval] = useState(100);
+  const [showQuote, setShowQuote] = useState(false);
   const [randomQuote, setRandomQuote] = useState({ content, author });
   const [fetchRandomQuote, setFetchRandomQuote] = useState(false);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [isErrorQuote, setIsErrorQuote] = useState(false);
 
   useEffect(() => {
-    if (fetchRandomQuote) {
-      setIsLoadingQuote(true);
-      setIsErrorQuote(false);
+    if (showQuote) {
+      if (fetchRandomQuote) {
+        setIsLoadingQuote(true);
+        setIsErrorQuote(false);
 
-      getRandomQuote();
+        getRandomQuote();
+      }
+      setFetchRandomQuote(false);
     }
-    setFetchRandomQuote(false);
   }, [fetchRandomQuote]);
   const getRandomQuote = async () => {
     try {
@@ -64,7 +68,9 @@ const Home = ({ content, author }) => {
     if (crazyMode) {
       const interval = setInterval(() => {
         setColor(randomColor());
-        getRandomQuote();
+        if (showQuote) {
+          getRandomQuote();
+        }
       }, crazyModeInterval);
       return () => clearInterval(interval);
     }
@@ -97,7 +103,9 @@ const Home = ({ content, author }) => {
 
   const randomMode = () => {
     setColor(randomColor());
-    setFetchRandomQuote(true);
+    if (showQuote) {
+      setFetchRandomQuote(true);
+    }
   };
   return (
     <div
@@ -120,6 +128,10 @@ const Home = ({ content, author }) => {
             className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
             onClick={() => setColor('#000000')}
           />
+          <ChatBubbleOvalLeftIcon
+            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+            onClick={() => setShowQuote(!showQuote)}
+          />
           {fullScrren ? (
             <ArrowsPointingInIcon
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
@@ -140,7 +152,7 @@ const Home = ({ content, author }) => {
               <input
                 type='range'
                 min='100'
-                max='1000'
+                max='10000'
                 value={crazyModeInterval}
                 className='text-white cursor-pointer hover:text-slate-500'
                 onChange={(e) => setCrazyModeInterval(e.target.value)}
@@ -165,13 +177,15 @@ const Home = ({ content, author }) => {
           />
         </div>
       )}
-      <div className='align-middle items-center justify-center flex min-h-[80vh]'>
-        <QuoteCard
-          randomQuote={randomQuote}
-          isLoading={isLoadingQuote}
-          isError={isErrorQuote}
-        />
-      </div>
+      {showQuote && (
+        <div className='align-middle items-center justify-center flex min-h-[80vh]'>
+          <QuoteCard
+            randomQuote={randomQuote}
+            isLoading={isLoadingQuote}
+            isError={isErrorQuote}
+          />
+        </div>
+      )}
     </div>
   );
 };
