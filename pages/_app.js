@@ -1,4 +1,3 @@
-import AppContext from '../context/AppContext';
 import Script from 'next/script';
 import '../styles/globals.css';
 
