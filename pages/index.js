@@ -11,6 +11,7 @@ import {
   ChatBubbleOvalLeftIcon,
 } from '@heroicons/react/24/outline';
 import QuoteCard from '../components/QuoteCard';
+import Clock from '../components/Clock';
 import axios from 'axios';
 import { RANDOM_QUOTES_URL } from '../lib/helpers';
 import FooterCredit from '../components/FooterCredit';
@@ -59,7 +60,7 @@ const Home = ({ content, author }) => {
   };
 
   useEffect(() => {
-    if (isIOSDevice()) {
+    if (!isIOSDevice()) {
       console.log(
         'Full screen mode is not supported on iOS devices. Please use a desktop browser to use this feature.'
       );
@@ -73,7 +74,8 @@ const Home = ({ content, author }) => {
   }, [fullScrren]);
 
   const isIOSDevice = () => {
-    return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+    const platforms = ['iPad', 'iPhone', 'iPod'];
+    return platforms.some((platform) => navigator.userAgent.includes(platform));
   };
 
   useEffect(() => {
@@ -129,6 +131,7 @@ const Home = ({ content, author }) => {
     }
     setFullScreen(!fullScrren);
   };
+
   return (
     <>
       <Head>
@@ -152,6 +155,7 @@ const Home = ({ content, author }) => {
       >
         {showControls ? (
           <div className='flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
+            <Clock />
             <h1 className=' text-white align-middle'>
               <span className='bg-black p-1 bg-opacity-10 rounded-md'>
                 {color}
