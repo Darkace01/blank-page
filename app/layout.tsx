@@ -24,6 +24,11 @@ export default function RootLayout({
           name='google-site-verification'
           content='63h6sakCIa6MwD-3KSfTqhDAXozANjDTYpoe1N531nM'
         />
+      </head>
+      <body
+        className='h-full w-full min-h-screen p-1 relative'
+        style={{ backgroundColor: '#000000' }}
+      >
         <Script
           strategy='afterInteractive'
           src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
@@ -37,11 +42,6 @@ export default function RootLayout({
             gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
           `}
         </Script>
-      </head>
-      <body
-        className='h-full w-full min-h-screen p-1 relative'
-        style={{ backgroundColor: '#000000' }}
-      >
         {children}
       </body>
     </html>
