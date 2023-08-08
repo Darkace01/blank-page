@@ -22,43 +22,17 @@ const randomColor = () => {
   return `#${randomColor}`;
 };
 
-const Page = ({ content, author }) => {
+export default function Home() {
   const [color, setColor] = useState('#000000');
   const [fullScrren, setFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [crazyMode, setCrazyMode] = useState(false);
   const [crazyModeInterval, setCrazyModeInterval] = useState(500);
   const [showQuote, setShowQuote] = useState(false);
-  const [randomQuote, setRandomQuote] = useState({ content, author });
+  const [randomQuote, setRandomQuote] = useState({});
   const [fetchRandomQuote, setFetchRandomQuote] = useState(false);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [isErrorQuote, setIsErrorQuote] = useState(false);
-
-  useEffect(() => {
-    if (showQuote) {
-      if (fetchRandomQuote) {
-        setIsLoadingQuote(true);
-        setIsErrorQuote(false);
-
-        getRandomQuote();
-      }
-      setFetchRandomQuote(false);
-    }
-  }, [fetchRandomQuote]);
-  const getRandomQuote = async () => {
-    try {
-      const res = await axios.get(RANDOM_QUOTES_URL);
-      if (res.data) {
-        const { content, author } = res.data;
-        setRandomQuote({ content, author });
-        setIsLoadingQuote(false);
-      }
-    } catch (error) {
-      console.log('error', error);
-      setIsErrorQuote(true);
-      setIsLoadingQuote(false);
-    }
-  };
 
   useEffect(() => {
     if (isIOSDevice()) {
@@ -84,7 +58,8 @@ const Page = ({ content, author }) => {
       const interval = setInterval(() => {
         setColor(randomColor());
         if (showQuote) {
-          getRandomQuote();
+          //TODO: Implement this with context api
+          // getRandomQuote();
         }
       }, crazyModeInterval);
       return () => clearInterval(interval);
@@ -118,7 +93,7 @@ const Page = ({ content, author }) => {
   };
 
   return (
-    <>
+    <main>
       <div
         className='h-full w-full min-h-screen p-1 relative'
         style={{ backgroundColor: color }} //{`background-color: ${color}`}
@@ -133,31 +108,31 @@ const Page = ({ content, author }) => {
             </h1>
             <LightBulbIcon
               onClick={randomMode}
-              title='Random Color'
+              // title='Random Color'
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
             />
 
             <ArrowPathIcon
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
               onClick={() => setColor('#000000')}
-              title='Black'
+              // title='Black'
             />
             <ChatBubbleOvalLeftIcon
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
               onClick={() => setShowQuote(!showQuote)}
-              title='Show Quote'
+              // title='Show Quote'
             />
             {fullScrren ? (
               <ArrowsPointingInIcon
                 className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
                 onClick={toggleFullScreen}
-                title='Exit Full Screen'
+                // title='Exit Full Screen'
               />
             ) : (
               <ArrowsPointingOutIcon
                 className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
                 onClick={toggleFullScreen}
-                title='Full Screen'
+                // title='Full Screen'
               />
             )}
             {crazyMode ? (
@@ -165,7 +140,7 @@ const Page = ({ content, author }) => {
                 <StopIcon
                   className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
                   onClick={() => setCrazyMode(!crazyMode)}
-                  title='Stop Crazy Mode'
+                  // title='Stop Crazy Mode'
                 />
                 <input
                   type='range'
@@ -182,13 +157,13 @@ const Page = ({ content, author }) => {
               <VariableIcon
                 className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
                 onClick={() => setCrazyMode(!crazyMode)}
-                title='Crazy Mode'
+                // title='Crazy Mode'
               />
             )}
             <EyeSlashIcon
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
               onClick={() => setShowControls(!showControls)}
-              title='Hide Controls'
+              // title='Hide Controls'
             />
           </div>
         ) : (
@@ -196,7 +171,7 @@ const Page = ({ content, author }) => {
             <EyeIcon
               className='h-7 w-7 text-slate-700 cursor-pointer hover:text-slate-500'
               onClick={() => setShowControls(!showControls)}
-              title='Show Controls'
+              // title='Show Controls'
             />
           </div>
         )}
@@ -210,9 +185,9 @@ const Page = ({ content, author }) => {
         )}
         <FooterCredit />
       </div>
-    </>
+    </main>
   );
-};
+}
 
 // export async function getStaticProps() {
 //   const res = await axios.get(RANDOM_QUOTES_URL);
@@ -225,4 +200,4 @@ const Page = ({ content, author }) => {
 //     }, // will be passed to the page component as props
 //   };
 // }
-export default Page;
+// export default Home;

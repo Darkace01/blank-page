@@ -19,7 +19,7 @@ function QuoteCard(fetchRandomQuote, showQuote) {
       //TODO: Working on the context api thing
       // setFetchRandomQuote(false);
     }
-  }, [fetchRandomQuote]);
+  }, [fetchRandomQuote, showQuote]);
   const getRandomQuote = async () => {
     try {
       const res = await axios.get(RANDOM_QUOTES_URL);
