@@ -1,3 +1,4 @@
+'use client';
 import React, { createContext, useEffect } from 'react';
 import { Quote } from '../types';
 

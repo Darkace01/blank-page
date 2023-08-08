@@ -1,18 +1,21 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 
 function Clock() {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [date, setDate] = useState(new Date());
+
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setCurrentTime(new Date());
+      setDate(new Date());
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [currentTime]);
+  }, []);
+
   return (
     <h1 className=' text-white align-middle'>
       <span className='bg-black p-1 bg-opacity-10 rounded-md'>
-        {/* {currentTime.toLocaleTimeString()} */}
+        {date.toLocaleTimeString()}
       </span>
     </h1>
   );

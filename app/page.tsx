@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect } from 'react';
 import {
   EyeIcon,
@@ -21,7 +22,7 @@ const randomColor = () => {
   return `#${randomColor}`;
 };
 
-const Home = ({ content, author }) => {
+const Page = ({ content, author }) => {
   const [color, setColor] = useState('#000000');
   const [fullScrren, setFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -118,21 +119,6 @@ const Home = ({ content, author }) => {
 
   return (
     <>
-      <Head>
-        <title>Blank Page</title>
-        <meta
-          name='viewport'
-          content='width=device-width, initial-scale=1'
-        ></meta>
-        <meta
-          name='description'
-          content='This was created out of frustration of not wanting to turn off my second monitor when I just want to focus on one screen. It"s a simple app that would fill your second monitor with a black screen. It also has some fun feature to change the color randomly and also a fun mode to do that continuously.'
-        />
-        <meta
-          name='google-site-verification'
-          content='63h6sakCIa6MwD-3KSfTqhDAXozANjDTYpoe1N531nM'
-        />
-      </Head>
       <div
         className='h-full w-full min-h-screen p-1 relative'
         style={{ backgroundColor: color }} //{`background-color: ${color}`}
@@ -228,15 +214,15 @@ const Home = ({ content, author }) => {
   );
 };
 
-export async function getStaticProps() {
-  const res = await axios.get(RANDOM_QUOTES_URL);
-  const { content, author } = res.data;
+// export async function getStaticProps() {
+//   const res = await axios.get(RANDOM_QUOTES_URL);
+//   const { content, author } = res.data;
 
-  return {
-    props: {
-      content,
-      author,
-    }, // will be passed to the page component as props
-  };
-}
-export default Home;
+//   return {
+//     props: {
+//       content,
+//       author,
+//     }, // will be passed to the page component as props
+//   };
+// }
+export default Page;
