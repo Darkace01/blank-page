@@ -1,8 +1,41 @@
-import React from 'react';
+'use client';
+import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { RANDOM_QUOTES_URL } from '../lib/helpers';
+import { Quote } from '../types';
 
-function QuoteCard({ randomQuote }, isLoadingQuote, isError) {
+function QuoteCard(fetchRandomQuote, showQuote) {
+  const [isErrorQuote, setIsErrorQuote] = useState(false);
+  const [randomQuote, setRandomQuote] = useState({} as Quote);
+  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
+  useEffect(() => {
+    if (showQuote) {
+      if (fetchRandomQuote) {
+        setIsLoadingQuote(true);
+        setIsErrorQuote(false);
+
+        getRandomQuote();
+      }
+      //TODO: Working on the context api thing
+      // setFetchRandomQuote(false);
+    }
+  }, [fetchRandomQuote]);
+  const getRandomQuote = async () => {
+    try {
+      const res = await axios.get(RANDOM_QUOTES_URL);
+      if (res.data) {
+        setRandomQuote(res.data);
+        setIsLoadingQuote(false);
+      }
+    } catch (error) {
+      console.log('error', error);
+      setIsErrorQuote(true);
+      setIsLoadingQuote(false);
+    }
+  };
+
   const { content, author } = randomQuote;
-  if (isError)
+  if (isErrorQuote)
     return (
       <>
         <div className='text-white bg-black bg-opacity-20 rounded-lg p-10 space-x-3 min-h-[15rem] max-w-4xl items-center justify-center align-middle flex'>
@@ -14,7 +47,7 @@ function QuoteCard({ randomQuote }, isLoadingQuote, isError) {
       </>
     );
 
-  if (isLoadingQuote === true)
+  if (isLoadingQuote === true || !content || !author)
     return (
       <div className='text-white bg-black bg-opacity-20 rounded-lg p-10 space-x-3 min-h-[15rem] max-w-4xl items-center justify-center align-middle flex'>
         <div className='animate-pulse flex space-x-4'>

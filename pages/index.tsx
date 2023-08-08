@@ -60,7 +60,7 @@ const Home = ({ content, author }) => {
   };
 
   useEffect(() => {
-    if (!isIOSDevice()) {
+    if (isIOSDevice()) {
       console.log(
         'Full screen mode is not supported on iOS devices. Please use a desktop browser to use this feature.'
       );
@@ -94,24 +94,12 @@ const Home = ({ content, author }) => {
     var elem = document.documentElement;
     if (elem.requestFullscreen) {
       elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) {
-      /* Safari */
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) {
-      /* IE11 */
-      elem.msRequestFullscreen();
     }
   };
 
   const exitFullscreen = () => {
-    if (!document.exitFullscreen) {
+    if (document.exitFullscreen) {
       document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      /* Safari */
-      document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) {
-      /* IE11 */
-      document.msExitFullscreen();
     }
   };
 
@@ -123,12 +111,6 @@ const Home = ({ content, author }) => {
   };
 
   const toggleFullScreen = () => {
-    if (isIOSDevice()) {
-      alert(
-        'Full screen mode is not supported on your device. Please use a supported browser to use this feature.'
-      );
-      return;
-    }
     setFullScreen(!fullScrren);
   };
 
@@ -162,10 +144,11 @@ const Home = ({ content, author }) => {
               </span>{' '}
             </h1>
             <LightBulbIcon
-              className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
               onClick={randomMode}
               title='Random Color'
+              className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
             />
+
             <ArrowPathIcon
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
               onClick={() => setColor('#000000')}
@@ -202,7 +185,9 @@ const Home = ({ content, author }) => {
                   max='10000'
                   value={crazyModeInterval}
                   className='text-white cursor-pointer hover:text-slate-500'
-                  onChange={(e) => setCrazyModeInterval(e.target.value)}
+                  onChange={(e) =>
+                    setCrazyModeInterval(parseInt(e.target?.value))
+                  }
                 />
               </>
             ) : (
@@ -230,9 +215,8 @@ const Home = ({ content, author }) => {
         {showQuote && (
           <div className='align-middle items-center justify-center flex min-h-[80vh]'>
             <QuoteCard
-              randomQuote={randomQuote}
-              isLoading={isLoadingQuote}
-              isError={isErrorQuote}
+              showQuote={showQuote}
+              fetchRandomQuote={fetchRandomQuote}
             />
           </div>
         )}
