@@ -98,8 +98,10 @@ const Home = ({ content, author }) => {
   };
 
   const exitFullscreen = () => {
-    if (document.exitFullscreen) {
+    if (document.fullscreenElement) {
       document.exitFullscreen();
+      // if (document.exitFullscreen) {
+      // }
     }
   };
 
