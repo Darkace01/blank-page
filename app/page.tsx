@@ -93,98 +93,96 @@ export default function Home() {
   };
 
   return (
-    <main>
-      <div
-        className='h-full w-full min-h-screen p-1 relative'
-        style={{ backgroundColor: color }} //{`background-color: ${color}`}
-      >
-        {showControls ? (
-          <div className='flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
-            <Clock />
-            <h1 className=' text-white align-middle'>
-              <span className='bg-black p-1 bg-opacity-10 rounded-md'>
-                {color}
-              </span>{' '}
-            </h1>
-            <LightBulbIcon
-              onClick={randomMode}
-              // title='Random Color'
-              className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-            />
+    <main
+      className='h-full w-full min-h-screen p-1 relative'
+      style={{ backgroundColor: color }} //{`background-color: ${color}`}
+    >
+      {showControls ? (
+        <div className='flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
+          <Clock />
+          <h1 className=' text-white align-middle'>
+            <span className='bg-black p-1 bg-opacity-10 rounded-md'>
+              {color}
+            </span>{' '}
+          </h1>
+          <LightBulbIcon
+            onClick={randomMode}
+            // title='Random Color'
+            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+          />
 
-            <ArrowPathIcon
+          <ArrowPathIcon
+            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+            onClick={() => setColor('#000000')}
+            // title='Black'
+          />
+          <ChatBubbleOvalLeftIcon
+            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+            onClick={() => setShowQuote(!showQuote)}
+            // title='Show Quote'
+          />
+          {fullScrren ? (
+            <ArrowsPointingInIcon
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-              onClick={() => setColor('#000000')}
-              // title='Black'
+              onClick={toggleFullScreen}
+              // title='Exit Full Screen'
             />
-            <ChatBubbleOvalLeftIcon
+          ) : (
+            <ArrowsPointingOutIcon
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-              onClick={() => setShowQuote(!showQuote)}
-              // title='Show Quote'
+              onClick={toggleFullScreen}
+              // title='Full Screen'
             />
-            {fullScrren ? (
-              <ArrowsPointingInIcon
-                className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-                onClick={toggleFullScreen}
-                // title='Exit Full Screen'
-              />
-            ) : (
-              <ArrowsPointingOutIcon
-                className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-                onClick={toggleFullScreen}
-                // title='Full Screen'
-              />
-            )}
-            {crazyMode ? (
-              <>
-                <StopIcon
-                  className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-                  onClick={() => setCrazyMode(!crazyMode)}
-                  // title='Stop Crazy Mode'
-                />
-                <input
-                  type='range'
-                  min='100'
-                  max='10000'
-                  value={crazyModeInterval}
-                  className='text-white cursor-pointer hover:text-slate-500'
-                  onChange={(e) =>
-                    setCrazyModeInterval(parseInt(e.target?.value))
-                  }
-                />
-              </>
-            ) : (
-              <VariableIcon
+          )}
+          {crazyMode ? (
+            <>
+              <StopIcon
                 className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
                 onClick={() => setCrazyMode(!crazyMode)}
-                // title='Crazy Mode'
+                // title='Stop Crazy Mode'
               />
-            )}
-            <EyeSlashIcon
+              <input
+                type='range'
+                min='100'
+                max='10000'
+                value={crazyModeInterval}
+                className='text-white cursor-pointer hover:text-slate-500'
+                onChange={(e) =>
+                  setCrazyModeInterval(parseInt(e.target?.value))
+                }
+              />
+            </>
+          ) : (
+            <VariableIcon
               className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-              onClick={() => setShowControls(!showControls)}
-              // title='Hide Controls'
+              onClick={() => setCrazyMode(!crazyMode)}
+              // title='Crazy Mode'
             />
-          </div>
-        ) : (
-          <div className='flex flex-row items-end justify-end p-4  bg-black bg-opacity-10 rounded-md mx-1'>
-            <EyeIcon
-              className='h-7 w-7 text-slate-700 cursor-pointer hover:text-slate-500'
-              onClick={() => setShowControls(!showControls)}
-              // title='Show Controls'
-            />
-          </div>
-        )}
-        {showQuote && (
-          <div className='align-middle items-center justify-center flex min-h-[80vh]'>
-            <QuoteCard
-              showQuote={showQuote}
-              fetchRandomQuote={fetchRandomQuote}
-            />
-          </div>
-        )}
-        <FooterCredit />
-      </div>
+          )}
+          <EyeSlashIcon
+            className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+            onClick={() => setShowControls(!showControls)}
+            // title='Hide Controls'
+          />
+        </div>
+      ) : (
+        <div className='flex flex-row items-end justify-end p-4  bg-black bg-opacity-10 rounded-md mx-1'>
+          <EyeIcon
+            className='h-7 w-7 text-slate-700 cursor-pointer hover:text-slate-500'
+            onClick={() => setShowControls(!showControls)}
+            // title='Show Controls'
+          />
+        </div>
+      )}
+      {showQuote && (
+        <div className='align-middle items-center justify-center flex min-h-[80vh]'>
+          <QuoteCard
+            showQuote={showQuote}
+            fetchRandomQuote={fetchRandomQuote}
+          />
+        </div>
+      )}
+      <FooterCredit />
     </main>
   );
 }

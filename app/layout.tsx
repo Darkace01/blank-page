@@ -27,7 +27,7 @@ export default function RootLayout({
       </head>
       <body
         className='h-full w-full min-h-screen p-1 relative'
-        style={{ backgroundColor: '#000000' }}
+        // style={{ backgroundColor: '#000000' }}
       >
         <Script
           strategy='afterInteractive'
