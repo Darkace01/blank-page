@@ -11,16 +11,13 @@ import {
   StopIcon,
   ChatBubbleOvalLeftIcon,
 } from '@heroicons/react/24/outline';
-import QuoteCard from '../components/QuoteCard';
-import Clock from '../components/Clock';
-import axios from 'axios';
-import { RANDOM_QUOTES_URL } from '../lib/helpers';
-import FooterCredit from '../components/FooterCredit';
-import Head from 'next/head';
-const randomColor = () => {
-  let randomColor = Math.floor(Math.random() * 16777215).toString(16);
-  return `#${randomColor}`;
-};
+import QuoteCard from '@/components/QuoteCard';
+// import Clock from '../components/Clock';
+import FooterCredit from '@/components/FooterCredit';
+import dynamic from 'next/dynamic';
+import { randomColor } from '@/lib/helpers';
+
+const Clock = dynamic(() => import('@/components/Clock'), { ssr: false });
 
 export default function Home() {
   const [color, setColor] = useState('#000000');
@@ -31,8 +28,8 @@ export default function Home() {
   const [showQuote, setShowQuote] = useState(false);
   const [randomQuote, setRandomQuote] = useState({});
   const [fetchRandomQuote, setFetchRandomQuote] = useState(false);
-  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
-  const [isErrorQuote, setIsErrorQuote] = useState(false);
+  // const [isLoadingQuote, setIsLoadingQuote] = useState(false);
+  // const [isErrorQuote, setIsErrorQuote] = useState(false);
 
   useEffect(() => {
     if (isIOSDevice()) {

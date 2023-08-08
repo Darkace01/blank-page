@@ -1,12 +1,11 @@
-'use client';
 import React, { useEffect, useState } from 'react';
-
-function Clock() {
-  const [date, setDate] = useState(new Date());
+export const dynamic = 'force-dynamic';
+export default function Clock() {
+  const [date, setDate] = useState(new Date().toLocaleTimeString());
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setDate(new Date());
+      setDate(new Date().toLocaleTimeString());
     }, 1000);
 
     return () => clearInterval(intervalId);
@@ -14,11 +13,7 @@ function Clock() {
 
   return (
     <h1 className=' text-white align-middle'>
-      <span className='bg-black p-1 bg-opacity-10 rounded-md'>
-        {date.toLocaleTimeString()}
-      </span>
+      <span className='bg-black p-1 bg-opacity-10 rounded-md'>{date}</span>
     </h1>
   );
 }
-
-export default Clock;
