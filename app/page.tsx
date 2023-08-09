@@ -29,7 +29,6 @@ export default function Home() {
   const [randomQuote, setRandomQuote] = useState({});
   const [fetchRandomQuote, setFetchRandomQuote] = useState(false);
   // const [isLoadingQuote, setIsLoadingQuote] = useState(false);
-  // const [isErrorQuote, setIsErrorQuote] = useState(false);
 
   useEffect(() => {
     if (isIOSDevice()) {
