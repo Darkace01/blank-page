@@ -1,3 +1,65 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Picture collage transitions. Each new collage picks one entry animation at
+   random (set as animation-name inline); tiles enter one after another while
+   the previous collage fades out underneath. */
+.collage-tile {
+  animation-duration: 800ms;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation-fill-mode: both;
+  animation-delay: var(--tile-delay, 0ms);
+}
+
+.collage-leaving {
+  animation: collage-out 700ms ease-in forwards;
+}
+
+@keyframes collage-rise {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes collage-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes collage-slide {
+  from {
+    opacity: 0;
+    transform: translateX(64px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes collage-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collage-tile,
+  .collage-leaving {
+    animation-duration: 1ms;
+    animation-delay: 0ms;
+  }
+}

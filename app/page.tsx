@@ -19,7 +19,8 @@ import FooterCredit from '@/components/FooterCredit';
 import dynamic from 'next/dynamic';
 import { PICTURE_MIN_INTERVAL, randomColor } from '@/lib/helpers';
 import { useQueryClient } from '@tanstack/react-query';
-import { QUOTE_QUERY_KEY, useRandomPicture } from '@/lib/apiHelpers';
+import { QUOTE_QUERY_KEY, useRandomCollage } from '@/lib/apiHelpers';
+import PictureCollage from '@/components/PictureCollage';
 
 const Clock = dynamic(() => import('@/components/Clock'), { ssr: false });
 
@@ -51,11 +52,10 @@ export default function Home() {
   const [bgMode, setBgMode] = useState<'color' | 'picture'>('color');
   const queryClient = useQueryClient();
   const {
-    picture,
+    collage,
     next: nextPicture,
     isError: isPictureError,
-  } = useRandomPicture(bgMode === 'picture');
-  const showPicture = bgMode === 'picture' && picture;
+  } = useRandomCollage(bgMode === 'picture');
 
   useEffect(() => {
     if (isIOSDevice()) {
@@ -105,19 +105,11 @@ export default function Home() {
   return (
     <main
       className='h-full w-full min-h-screen p-1 relative'
-      style={
-        showPicture
-          ? {
-              backgroundColor: '#000000',
-              backgroundImage: `url(${picture.src})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }
-          : { backgroundColor: color }
-      }
+      style={{ backgroundColor: color }}
     >
+      {bgMode === 'picture' && <PictureCollage collage={collage} />}
       {showControls ? (
-        <div className='flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
+        <div className='relative z-10 flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
           <Clock />
           <h1 className=' text-white align-middle'>
             <span className='bg-black p-1 bg-opacity-10 rounded-md'>
@@ -125,17 +117,10 @@ export default function Home() {
                 color
               ) : isPictureError ? (
                 "Couldn't load pictures"
-              ) : picture ? (
-                <a
-                  href={picture.link}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='hover:underline'
-                >
-                  Photo: {picture.author}
-                </a>
+              ) : collage ? (
+                `${collage.tiles.length} photos`
               ) : (
-                'Loading picture...'
+                'Loading pictures...'
               )}
             </span>{' '}
           </h1>
@@ -216,7 +201,7 @@ export default function Home() {
           />
         </div>
       ) : (
-        <div className='flex flex-row items-end justify-end p-4  bg-black bg-opacity-10 rounded-md mx-1'>
+        <div className='relative z-10 flex flex-row items-end justify-end p-4  bg-black bg-opacity-10 rounded-md mx-1'>
           <EyeIcon
             className='h-7 w-7 text-slate-700 cursor-pointer hover:text-slate-500'
             onClick={() => setShowControls(!showControls)}
@@ -225,7 +210,7 @@ export default function Home() {
         </div>
       )}
       {showQuote && (
-        <div className='align-middle items-center justify-center flex min-h-[80vh]'>
+        <div className='relative z-10 align-middle items-center justify-center flex min-h-[80vh]'>
           <QuoteCard />
         </div>
       )}

@@ -31,16 +31,22 @@ There are no tests. Verify changes with `yarn lint` and `yarn build`, then check
 - `components/Clock.tsx`: live time. Loaded with `next/dynamic` and `ssr: false` to avoid hydration mismatches.
 - `components/FooterCredit.tsx`: footer.
 - `lib/helpers.js`: `randomColor()`, the quote and picture API constants, and `pictureUrl(id)` (builds a Picsum URL sized to the viewport × devicePixelRatio, capped at 3840×2160).
-- `lib/apiHelpers.js`: `useQuote()` (React Query) and `QUOTE_QUERY_KEY`. The Random button in `page.tsx` calls `queryClient.refetchQueries({ queryKey: QUOTE_QUERY_KEY })` to get a new quote. Also `useRandomPicture(enabled)`, which returns `{ picture, next, isError }`: it fetches one random page of the Picsum list (cached for the session), and `next()` preloads a random photo before swapping it in.
+- `lib/apiHelpers.js`: `useQuote()` (React Query) and `QUOTE_QUERY_KEY`. The Random button in `page.tsx` calls `queryClient.refetchQueries({ queryKey: QUOTE_QUERY_KEY })` to get a new quote. Also `useRandomPicture(enabled)`, which returns `{ picture, next, isError }`: it fetches the local `/api/backgrounds` list and, only when no local photos are usable, one random page of the Picsum list (both cached for the session). `next()` preloads a random photo (never the one on screen) before swapping it in. An image that fails to load is dropped from the pool and another is tried automatically. Once every local image has failed, it falls back to Picsum. After `MAX_PICTURE_FAILURES` (5) failures in a row it stops and reports an error, so being offline doesn't cause endless retries.
 - `types.ts`: `Quote` type (legacy shape from the old quotable API; only `content` and `author` are used).
 
 ## Quotes API
 
 Quotes come from DummyJSON (`https://dummyjson.com/quotes/random`): free, no key, CORS allowed. It returns `{ id, quote, author }`, which `fetchQuote` maps to `{ content, author }` for the card. Earlier APIs are dead: quotable.io (broken TLS) and quote-garden. ZenQuotes doesn't send CORS headers, so browser code can't call it.
 
-## Pictures API
+## Pictures
 
-Background photos come from Lorem Picsum (`https://picsum.photos`): free, no key, CORS allowed. `GET /v2/list?page=1..10&limit=100` returns `{ id, author, url, ... }` (~990 photos in total; page 11+ is empty). Images load from `/id/{id}/{width}/{height}`. `url` is the Unsplash page, used for the "Photo: author" credit link shown in place of the hex colour. In picture mode, crazy mode never swaps faster than `PICTURE_MIN_INTERVAL` (3s), because each swap downloads a full-screen image.
+### Local folder (takes priority)
+
+Images dropped into `public/backgrounds/` (jpg, jpeg, png, webp, avif, gif, svg) are used for picture mode, and Picsum is skipped. `app/api/backgrounds/route.ts` lists the folder and returns `{ src, author, link }`, where `author` is the filename without its extension (shown as the credit). The route is `force-static`. In `yarn dev` it re-reads the folder on each request, so new photos appear after a page refresh. In production it's generated at build time, same as `public/` itself, so add or remove photos before building or deploying. The `.gitkeep` keeps the empty folder in git.
+
+### Picsum (fallback)
+
+When the local folder is empty, its listing fails, or none of its images load, background photos come from Lorem Picsum (`https://picsum.photos`): free, no key, CORS allowed. `GET /v2/list?page=1..10&limit=100` returns `{ id, author, url, ... }` (~990 photos in total; page 11+ is empty). Images load from `/id/{id}/{width}/{height}`. `url` is the Unsplash page, used for the "Photo: author" credit link shown in place of the hex colour. In picture mode, crazy mode never swaps faster than `PICTURE_MIN_INTERVAL` (3s), because each swap downloads a full-screen image.
 
 ## Dead code to be aware of
 
