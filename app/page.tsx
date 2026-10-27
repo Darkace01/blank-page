@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   EyeIcon,
   EyeSlashIcon,
@@ -51,28 +51,11 @@ export default function Home() {
   const [showQuote, setShowQuote] = useState(false);
   const [bgMode, setBgMode] = useState<'color' | 'picture'>('color');
   const queryClient = useQueryClient();
-  const controlsRef = useRef<HTMLDivElement>(null);
-  // Bottom edge of the control bar while it's visible, so the collage sits
-  // below it; 0 when hidden.
-  const [controlsBottom, setControlsBottom] = useState(0);
   const {
     collage,
     next: nextPicture,
     isError: isPictureError,
-  } = useRandomCollage(bgMode === 'picture', controlsBottom);
-
-  useEffect(() => {
-    const bar = controlsRef.current;
-    if (!showControls || !bar) {
-      setControlsBottom(0);
-      return;
-    }
-    const measure = () => setControlsBottom(bar.getBoundingClientRect().bottom);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(bar);
-    return () => observer.disconnect();
-  }, [showControls]);
+  } = useRandomCollage(bgMode === 'picture');
 
   useEffect(() => {
     if (isIOSDevice()) {
@@ -124,13 +107,9 @@ export default function Home() {
       className='h-full w-full min-h-screen p-1 relative'
       style={{ backgroundColor: color }}
     >
-      {bgMode === 'picture' && (
-        <PictureCollage collage={collage} controlsBottom={controlsBottom} />
-      )}
+      {bgMode === 'picture' && <PictureCollage collage={collage} />}
       {showControls ? (
-        <div
-          ref={controlsRef}
-          className='relative z-10 flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
+        <div className='relative z-10 flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
           <Clock />
           <h1 className=' text-white align-middle'>
             <span className='bg-black p-1 bg-opacity-10 rounded-md'>

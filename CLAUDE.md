@@ -18,6 +18,7 @@ yarn dev      # dev server
 yarn build    # production build, also runs the TypeScript check
 yarn lint     # biome lint .
 yarn check    # biome check . (lint + format + import sorting)
+yarn upload-backgrounds "<folder>"  # resize photos and upload them to Vercel Blob
 ```
 
 There are no tests. Verify changes with `yarn lint` and `yarn build`, then check the page in a browser.
@@ -42,13 +43,21 @@ Quotes come from DummyJSON (`https://dummyjson.com/quotes/random`): free, no key
 
 ## Pictures
 
-### Local folder (takes priority)
+`app/api/backgrounds/route.ts` returns the collage photos as `{ src, author, link, width, height }`, trying the sources in this order: Vercel Blob, then the `public/backgrounds/` folder. If both are empty, the client falls back to Picsum. The route uses `revalidate = 3600`: in production it's cached and refreshed hourly, so new Blob uploads appear within an hour without a redeploy. In `yarn dev` it runs on every request, so changes show after a page refresh.
 
-Images dropped into `public/backgrounds/` (jpg, jpeg, png, webp, avif, gif, svg) are used for picture mode, and Picsum is skipped. `app/api/backgrounds/route.ts` lists the folder and returns `{ src, author, link, width, height }`, where `author` is the filename without its extension (shown as the credit). Dimensions come from `image-size` (`imageSizeFromFile` reads only the file header), with width and height swapped for EXIF orientations 5–8 (rotated phone photos). Files whose size can't be read, being corrupt or unsupported, are left out of the list. The route is `force-static`. In `yarn dev` it re-reads the folder on each request, so new photos appear after a page refresh. In production it's generated at build time, same as `public/` itself, so add or remove photos before building or deploying. The `.gitkeep` keeps the empty folder in git.
+### Vercel Blob (takes priority)
+
+Used when `BLOB_READ_WRITE_TOKEN` is set (locally in `.env.local`, which is git-ignored; on Vercel it's added automatically when the Blob store is connected to the project) and the store has photos under `backgrounds/`. The store is public, and tiles load straight from its `*.public.blob.vercel-storage.com` URLs.
+
+Photos get there through `scripts/upload-backgrounds.mjs` (`yarn upload-backgrounds "<folder>"`, with env loaded via `node --env-file=.env.local`). It uses `sharp` to rotate each photo upright, shrink it to 2400px on the longest side and convert it to WebP at quality 80, then uploads it as `backgrounds/<slugified-name>-<width>x<height>.webp`. Blob has no custom metadata, so the dimensions live in the pathname, and the route parses them so collages can be laid out before any photo downloads. Blobs without a size in their name (e.g. uploaded by hand in the dashboard) are skipped. Uploads use `addRandomSuffix: false` and a one-year `cacheControlMaxAge`, since a name never changes once uploaded. The script skips photos already in the store and can be re-run after adding more. The first photo is uploaded alone, so a bad token or a private store fails fast. The original files are never modified.
+
+### Local folder
+
+Used when Blob isn't configured or has no photos. Images in `public/backgrounds/` (jpg, jpeg, png, webp, avif, gif, svg) are listed with dimensions from `image-size` (`imageSizeFromFile` reads only the file header), with width and height swapped for EXIF orientations 5–8 (rotated phone photos). `author` is the filename without its extension, shown as the credit. Files whose size can't be read, being corrupt or unsupported, are left out. As with anything in `public/`, production only serves files that existed at build time. The `.gitkeep` keeps the empty folder in git.
 
 ### Picsum (fallback)
 
-When the local folder is empty, its listing fails, or none of its images load, background photos come from Lorem Picsum (`https://picsum.photos`): free, no key, CORS allowed. `GET /v2/list?page=1..10&limit=100` returns `{ id, author, url, width, height, ... }` (~990 photos in total; page 11+ is empty). Images load from `/id/{id}/{width}/{height}`, requested at each tile's size. `url` is the Unsplash page, used for each tile's hover credit link. In picture mode the control bar shows the number of photos in place of the hex colour, and crazy mode never swaps faster than `PICTURE_MIN_INTERVAL` (5s), because each change downloads a whole collage and the entry transition needs time to play.
+When the route returns no photos, its request fails, or none of its images load, background photos come from Lorem Picsum (`https://picsum.photos`): free, no key, CORS allowed. `GET /v2/list?page=1..10&limit=100` returns `{ id, author, url, width, height, ... }` (~990 photos in total; page 11+ is empty). Images load from `/id/{id}/{width}/{height}`, requested at each tile's size. `url` is the Unsplash page, used for each tile's hover credit link. In picture mode the control bar shows the number of photos in place of the hex colour, and crazy mode never swaps faster than `PICTURE_MIN_INTERVAL` (5s), because each change downloads a whole collage and the entry transition needs time to play.
 
 ## Dead code to be aware of
 

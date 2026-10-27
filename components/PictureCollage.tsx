@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { COLLAGE_INSET_VMIN, collageTop } from '@/lib/helpers';
+import { COLLAGE_INSET_VMIN } from '@/lib/helpers';
 
 type Tile = {
   src: string;
@@ -36,8 +36,8 @@ function CollageLayer({
   const ratio = collage.boxWidth / collage.boxHeight;
   return (
     // Keeps the shape the collage was laid out for and is fitted, centred,
-    // into the container, so if the space changes (controls shown or hidden,
-    // window resized) the collage scales evenly instead of being squashed.
+    // into the container, so if the window is resized the collage scales
+    // evenly instead of being squashed.
     <div
       className={`absolute inset-0 m-auto ${
         leaving ? 'collage-leaving pointer-events-none' : ''
@@ -89,11 +89,8 @@ function CollageLayer({
 
 export default function PictureCollage({
   collage,
-  controlsBottom,
 }: {
   collage: Collage | null;
-  // Where the control bar ends, in px from the top (0 when it's hidden).
-  controlsBottom: number;
 }) {
   const [leaving, setLeaving] = useState<Collage | null>(null);
   const shown = useRef<Collage | null>(null);
@@ -118,7 +115,6 @@ export default function PictureCollage({
       className='absolute overflow-hidden'
       style={{
         inset: `${COLLAGE_INSET_VMIN}vmin`,
-        top: collageTop(controlsBottom),
         containerType: 'size',
       }}
     >
