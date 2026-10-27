@@ -14,7 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en'>
+    // `dark` selects the dark shadcn/ui theme (app/globals.css).
+    <html lang='en' className='dark'>
       <head>
         <meta
           name='viewport'

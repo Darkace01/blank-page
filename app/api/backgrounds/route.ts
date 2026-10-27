@@ -21,6 +21,9 @@ type Picture = {
 
 // --- Vercel Blob (uploaded with `yarn upload-backgrounds`) ---
 
+// Every photo in the Blob store was taken by the app's author.
+const BLOB_PHOTOGRAPHER = 'Kazeem Quadri';
+
 const BLOB_PREFIX = 'backgrounds/';
 // The upload script puts each photo's size in its name, e.g.
 // backgrounds/20250721_090412-1920x2400.webp; Blob has no custom metadata.
@@ -38,7 +41,7 @@ const blobPictures = async (): Promise<Picture[]> => {
       if (!match) continue;
       pictures.push({
         src: blob.url,
-        author: match[1],
+        author: BLOB_PHOTOGRAPHER,
         link: blob.url,
         width: Number(match[2]),
         height: Number(match[3]),
