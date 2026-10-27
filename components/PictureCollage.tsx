@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { COLLAGE_INSET_VMIN } from '@/lib/helpers';
+import { COLLAGE_INSET_VMIN, collageTop } from '@/lib/helpers';
 
 type Tile = {
   src: string;
@@ -14,6 +14,9 @@ type Tile = {
 
 export type Collage = {
   id: number;
+  // Size of the box the tiles were laid out for (CSS px).
+  boxWidth: number;
+  boxHeight: number;
   transition: 'rise' | 'zoom' | 'slide';
   tiles: Tile[];
 };
@@ -30,11 +33,20 @@ function CollageLayer({
   collage: Collage;
   leaving?: boolean;
 }) {
+  const ratio = collage.boxWidth / collage.boxHeight;
   return (
+    // Keeps the shape the collage was laid out for and is fitted, centred,
+    // into the container, so if the space changes (controls shown or hidden,
+    // window resized) the collage scales evenly instead of being squashed.
     <div
-      className={`absolute inset-0 ${
+      className={`absolute inset-0 m-auto ${
         leaving ? 'collage-leaving pointer-events-none' : ''
       }`}
+      style={{
+        aspectRatio: `${collage.boxWidth} / ${collage.boxHeight}`,
+        width: `min(100cqw, calc(100cqh * ${ratio}))`,
+        height: 'auto',
+      }}
     >
       {collage.tiles.map((tile, i) => (
         <div
@@ -77,8 +89,11 @@ function CollageLayer({
 
 export default function PictureCollage({
   collage,
+  controlsBottom,
 }: {
   collage: Collage | null;
+  // Where the control bar ends, in px from the top (0 when it's hidden).
+  controlsBottom: number;
 }) {
   const [leaving, setLeaving] = useState<Collage | null>(null);
   const shown = useRef<Collage | null>(null);
@@ -101,7 +116,11 @@ export default function PictureCollage({
     // Clipped so tiles sliding in from outside their spot don't add scrollbars.
     <div
       className='absolute overflow-hidden'
-      style={{ inset: `${COLLAGE_INSET_VMIN}vmin` }}
+      style={{
+        inset: `${COLLAGE_INSET_VMIN}vmin`,
+        top: collageTop(controlsBottom),
+        containerType: 'size',
+      }}
     >
       {leaving && <CollageLayer key={leaving.id} collage={leaving} leaving />}
       {collage && <CollageLayer key={collage.id} collage={collage} />}
