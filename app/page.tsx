@@ -10,14 +10,16 @@ import {
   VariableIcon,
   StopIcon,
   ChatBubbleOvalLeftIcon,
+  PhotoIcon,
+  SwatchIcon,
 } from '@heroicons/react/24/outline';
 import QuoteCard from '@/components/QuoteCard';
 // import Clock from '../components/Clock';
 import FooterCredit from '@/components/FooterCredit';
 import dynamic from 'next/dynamic';
-import { randomColor } from '@/lib/helpers';
+import { PICTURE_MIN_INTERVAL, randomColor } from '@/lib/helpers';
 import { useQueryClient } from '@tanstack/react-query';
-import { QUOTE_QUERY_KEY } from '@/lib/apiHelpers';
+import { QUOTE_QUERY_KEY, useRandomPicture } from '@/lib/apiHelpers';
 
 const Clock = dynamic(() => import('@/components/Clock'), { ssr: false });
 
@@ -46,7 +48,14 @@ export default function Home() {
   const [crazyMode, setCrazyMode] = useState(false);
   const [crazyModeInterval, setCrazyModeInterval] = useState(500);
   const [showQuote, setShowQuote] = useState(false);
+  const [bgMode, setBgMode] = useState<'color' | 'picture'>('color');
   const queryClient = useQueryClient();
+  const {
+    picture,
+    next: nextPicture,
+    isError: isPictureError,
+  } = useRandomPicture(bgMode === 'picture');
+  const showPicture = bgMode === 'picture' && picture;
 
   useEffect(() => {
     if (isIOSDevice()) {
@@ -64,15 +73,26 @@ export default function Home() {
 
   useEffect(() => {
     if (crazyMode) {
+      if (bgMode === 'picture') {
+        const interval = setInterval(
+          nextPicture,
+          Math.max(crazyModeInterval, PICTURE_MIN_INTERVAL),
+        );
+        return () => clearInterval(interval);
+      }
       const interval = setInterval(() => {
         setColor(randomColor());
       }, crazyModeInterval);
       return () => clearInterval(interval);
     }
-  }, [crazyMode, crazyModeInterval]);
+  }, [crazyMode, crazyModeInterval, bgMode, nextPicture]);
 
   const randomMode = () => {
-    setColor(randomColor());
+    if (bgMode === 'picture') {
+      nextPicture();
+    } else {
+      setColor(randomColor());
+    }
     if (showQuote) {
       queryClient.refetchQueries({ queryKey: QUOTE_QUERY_KEY });
     }
@@ -85,16 +105,53 @@ export default function Home() {
   return (
     <main
       className='h-full w-full min-h-screen p-1 relative'
-      style={{ backgroundColor: color }} //{`background-color: ${color}`}
+      style={
+        showPicture
+          ? {
+              backgroundColor: '#000000',
+              backgroundImage: `url(${picture.src})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }
+          : { backgroundColor: color }
+      }
     >
       {showControls ? (
         <div className='flex flex-row items-end justify-end align-middle p-4 flex-wrap space-x-2 space-y-2 bg-black bg-opacity-10 rounded-md mx-1'>
           <Clock />
           <h1 className=' text-white align-middle'>
             <span className='bg-black p-1 bg-opacity-10 rounded-md'>
-              {color}
+              {bgMode === 'color' ? (
+                color
+              ) : isPictureError ? (
+                "Couldn't load pictures"
+              ) : picture ? (
+                <a
+                  href={picture.link}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='hover:underline'
+                >
+                  Photo: {picture.author}
+                </a>
+              ) : (
+                'Loading picture...'
+              )}
             </span>{' '}
           </h1>
+          {bgMode === 'color' ? (
+            <PhotoIcon
+              className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+              onClick={() => setBgMode('picture')}
+              // title='Picture Background'
+            />
+          ) : (
+            <SwatchIcon
+              className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
+              onClick={() => setBgMode('color')}
+              // title='Colour Background'
+            />
+          )}
           <LightBulbIcon
             onClick={randomMode}
             // title='Random Color'
@@ -103,7 +160,10 @@ export default function Home() {
 
           <ArrowPathIcon
             className='h-7 w-7 text-white cursor-pointer hover:text-slate-500'
-            onClick={() => setColor('#000000')}
+            onClick={() => {
+              setBgMode('color');
+              setColor('#000000');
+            }}
             // title='Black'
           />
           <ChatBubbleOvalLeftIcon
