@@ -16,8 +16,28 @@ import QuoteCard from '@/components/QuoteCard';
 import FooterCredit from '@/components/FooterCredit';
 import dynamic from 'next/dynamic';
 import { randomColor } from '@/lib/helpers';
+import { useQueryClient } from '@tanstack/react-query';
+import { QUOTE_QUERY_KEY } from '@/lib/apiHelpers';
 
 const Clock = dynamic(() => import('@/components/Clock'), { ssr: false });
+
+const isIOSDevice = () => {
+  const platforms = ['iPad', 'iPhone', 'iPod'];
+  return platforms.some((platform) => navigator.userAgent.includes(platform));
+};
+
+const requestFullScreen = () => {
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  }
+};
+
+const exitFullscreen = () => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  }
+};
 
 export default function Home() {
   const [color, setColor] = useState('#000000');
@@ -26,14 +46,12 @@ export default function Home() {
   const [crazyMode, setCrazyMode] = useState(false);
   const [crazyModeInterval, setCrazyModeInterval] = useState(500);
   const [showQuote, setShowQuote] = useState(false);
-  const [randomQuote, setRandomQuote] = useState({});
-  const [fetchRandomQuote, setFetchRandomQuote] = useState(false);
-  // const [isLoadingQuote, setIsLoadingQuote] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (isIOSDevice()) {
       console.log(
-        'Full screen mode is not supported on iOS devices. Please use a desktop browser to use this feature.'
+        'Full screen mode is not supported on iOS devices. Please use a desktop browser to use this feature.',
       );
       return;
     }
@@ -44,43 +62,19 @@ export default function Home() {
     }
   }, [fullScrren]);
 
-  const isIOSDevice = () => {
-    const platforms = ['iPad', 'iPhone', 'iPod'];
-    return platforms.some((platform) => navigator.userAgent.includes(platform));
-  };
-
   useEffect(() => {
     if (crazyMode) {
       const interval = setInterval(() => {
         setColor(randomColor());
-        if (showQuote) {
-          //TODO: Implement this with context api
-          // getRandomQuote();
-        }
       }, crazyModeInterval);
       return () => clearInterval(interval);
     }
   }, [crazyMode, crazyModeInterval]);
 
-  const requestFullScreen = () => {
-    var elem = document.documentElement;
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    }
-  };
-
-  const exitFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-      // if (document.exitFullscreen) {
-      // }
-    }
-  };
-
   const randomMode = () => {
     setColor(randomColor());
     if (showQuote) {
-      setFetchRandomQuote(true);
+      queryClient.refetchQueries({ queryKey: QUOTE_QUERY_KEY });
     }
   };
 
@@ -144,7 +138,7 @@ export default function Home() {
                 value={crazyModeInterval}
                 className='text-white cursor-pointer hover:text-slate-500'
                 onChange={(e) =>
-                  setCrazyModeInterval(parseInt(e.target?.value))
+                  setCrazyModeInterval(Number.parseInt(e.target?.value, 10))
                 }
               />
             </>
@@ -172,10 +166,7 @@ export default function Home() {
       )}
       {showQuote && (
         <div className='align-middle items-center justify-center flex min-h-[80vh]'>
-          <QuoteCard
-            showQuote={showQuote}
-            fetchRandomQuote={fetchRandomQuote}
-          />
+          <QuoteCard />
         </div>
       )}
       <FooterCredit />

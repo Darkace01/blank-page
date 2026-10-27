@@ -1,6 +1,6 @@
 'use client';
 import React, { createContext, useEffect } from 'react';
-import { Quote } from '../types';
+import type { Quote } from '../types';
 
 type AppContextType = {
   crazyMode: boolean;
@@ -37,28 +37,28 @@ const defualtRandomQuote = {
 } as Quote;
 const AppContext = createContext({
   crazyMode: false,
-  setCrazyMode: (crazyMode: boolean) => {},
+  setCrazyMode: () => {},
   showQuotes: false,
-  setShowQuotes: (showQuotes: boolean) => {},
+  setShowQuotes: () => {},
   randomQuote: defualtRandomQuote,
-  setRandomQuote: (randomQuote: Quote) => {},
+  setRandomQuote: () => {},
   color: '#000000',
-  setColor: (color: string) => {},
+  setColor: () => {},
   fullScrren: false,
-  setFullScreen: (fullScrren: boolean) => {},
+  setFullScreen: () => {},
   showControls: true,
-  setShowControls: (showControls: boolean) => {},
+  setShowControls: () => {},
   crazyModeInterval: 500,
-  setCrazyModeInterval: (crazyModeInterval: number) => {},
+  setCrazyModeInterval: () => {},
   fetchRandomQuote: false,
-  setFetchRandomQuote: (fetchRandomQuote: boolean) => {},
+  setFetchRandomQuote: () => {},
   isLoadingQuote: false,
-  setIsLoadingQuote: (isLoadingQuote: boolean) => {},
+  setIsLoadingQuote: () => {},
   isErrorQuote: false,
-  setIsErrorQuote: (isErrorQuote: boolean) => {},
+  setIsErrorQuote: () => {},
 } as AppContextType);
 
-export const AppValuesProvider = ({ children }: any) => {
+export const AppValuesProvider = ({ children }: { children: React.ReactNode }) => {
   const [color, setColor] = React.useState('#000000');
   const [fullScrren, setFullScreen] = React.useState(false);
   const [showControls, setShowControls] = React.useState(true);
@@ -89,7 +89,7 @@ export const AppValuesProvider = ({ children }: any) => {
           setIsLoadingQuote(false);
           setFetchRandomQuote(false);
         })
-        .catch((error) => {
+        .catch(() => {
           setIsLoadingQuote(false);
           setIsErrorQuote(true);
           setFetchRandomQuote(false);

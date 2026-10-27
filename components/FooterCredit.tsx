@@ -1,5 +1,3 @@
-import React from 'react';
-
 function FooterCredit() {
   return (
     <div className='absolute bottom-0 right-0 text-white opacity-10 hover:opacity-100 transition-opacity cursor-pointer text-xs text-center pb-2 pr-2'>

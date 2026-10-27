@@ -1,6 +1,6 @@
 import Script from 'next/script';
 import './globals.css';
-import { AppValuesProvider } from '../context/AppContext';
+import Providers from './providers';
 
 export const metadata = {
   title: 'Blank Page',
@@ -42,7 +42,7 @@ export default function RootLayout({
             gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
           `}
         </Script>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
