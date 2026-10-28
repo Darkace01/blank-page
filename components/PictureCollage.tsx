@@ -4,19 +4,16 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { COLLAGE_INSET_VMIN, pictureUrl } from '@/lib/helpers';
+import { COLLAGE_INSET_VMIN } from '@/lib/helpers';
 
 type Tile = {
   src: string;
-  // Picsum photos only; used to request a larger copy for the lightbox.
-  id?: string;
   author: string;
   link: string;
   left: number;
   top: number;
   width: number;
   height: number;
-  aspectRatio: number;
 };
 
 export type Collage = {
@@ -157,17 +154,6 @@ function CollageLayer({
   );
 }
 
-// Large source for the lightbox. Blob and local photos are already full size
-// (and cached from the tile); Picsum photos are re-requested to fit the screen.
-const lightboxSrc = (tile: Tile) => {
-  if (!tile.id) return tile.src;
-  const scale = Math.min(
-    (window.innerWidth * 0.92) / tile.aspectRatio,
-    window.innerHeight * 0.85,
-  );
-  return pictureUrl(tile.id, scale * tile.aspectRatio, scale);
-};
-
 function Lightbox({
   tiles,
   index,
@@ -199,9 +185,9 @@ function Lightbox({
         {tile && (
           <>
             <DialogTitle className='sr-only'>Photo by {tile.author}</DialogTitle>
-            {/* biome-ignore lint/performance/noImgElement: full-size photo from Blob/Picsum, shown as-is */}
+            {/* biome-ignore lint/performance/noImgElement: the full-size Blob photo, already cached from its tile */}
             <img
-              src={lightboxSrc(tile)}
+              src={tile.src}
               alt={`By ${tile.author}`}
               className='mx-auto max-h-[85vh] max-w-[92vw] rounded-md object-contain shadow-2xl'
             />

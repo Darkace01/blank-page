@@ -43,8 +43,6 @@ type ControlsSheetProps = {
   crazyModeInterval: number;
   onCrazyModeIntervalChange: (ms: number) => void;
   pictureStatus: string;
-  // Who took the photos on screen; null until a collage has loaded.
-  photoCredit: string | null;
   onShufflePictures: () => void;
   autoChange: boolean;
   onAutoChangeChange: (on: boolean) => void;
@@ -96,7 +94,6 @@ export default function ControlsSheet(props: ControlsSheetProps) {
     crazyModeInterval,
     onCrazyModeIntervalChange,
     pictureStatus,
-    photoCredit,
     onShufflePictures,
     autoChange,
     onAutoChangeChange,
@@ -261,7 +258,8 @@ export default function ControlsSheet(props: ControlsSheetProps) {
                 Kazeem Quadri
               </a>
             </p>
-            {bgMode === 'picture' && photoCredit && <p>{photoCredit}</p>}
+            {/* Every photo in the Blob store is Kazeem's. */}
+            <p>All photos taken by Kazeem Quadri.</p>
           </div>
         </div>
       </SheetContent>

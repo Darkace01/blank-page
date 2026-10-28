@@ -5,11 +5,19 @@ import FooterCredit from '@/components/FooterCredit';
 import ControlsSheet, { type BgMode } from '@/components/ControlsSheet';
 import PictureCollage from '@/components/PictureCollage';
 import dynamic from 'next/dynamic';
-import { DEFAULT_SLIDESHOW_INTERVAL, randomColor } from '@/lib/helpers';
+import {
+  DEFAULT_SLIDESHOW_INTERVAL,
+  randomColor,
+  SLIDESHOW_INTERVALS,
+} from '@/lib/helpers';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUOTE_QUERY_KEY, useRandomCollage } from '@/lib/apiHelpers';
 
 const Clock = dynamic(() => import('@/components/Clock'), { ssr: false });
+
+const isHexColor = (value: unknown) =>
+  typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
 
 const isIOSDevice = () => {
   const platforms = ['iPad', 'iPhone', 'iPod'];
@@ -30,16 +38,28 @@ const exitFullscreen = () => {
 };
 
 export default function Home() {
-  const [color, setColor] = useState('#000000');
+  // Settings are saved in localStorage and restored after a refresh.
+  // Fullscreen isn't: browsers only allow entering it from a user's click.
+  const [color, setColor] = usePersistentState('color', '#000000', isHexColor);
   const [fullScrren, setFullScreen] = useState(false);
-  const [crazyMode, setCrazyMode] = useState(false);
-  const [crazyModeInterval, setCrazyModeInterval] = useState(500);
-  const [showQuote, setShowQuote] = useState(false);
-  const [showClock, setShowClock] = useState(true);
-  const [bgMode, setBgMode] = useState<BgMode>('color');
-  const [autoChange, setAutoChange] = useState(true);
-  const [changeInterval, setChangeInterval] = useState(
+  const [crazyMode, setCrazyMode] = usePersistentState('crazyMode', false);
+  const [crazyModeInterval, setCrazyModeInterval] = usePersistentState(
+    'crazyModeInterval',
+    500,
+    (value) => typeof value === 'number' && value >= 100 && value <= 10000,
+  );
+  const [showQuote, setShowQuote] = usePersistentState('showQuote', false);
+  const [showClock, setShowClock] = usePersistentState('showClock', true);
+  const [bgMode, setBgMode] = usePersistentState<BgMode>(
+    'bgMode',
+    'color',
+    (value) => value === 'color' || value === 'picture',
+  );
+  const [autoChange, setAutoChange] = usePersistentState('autoChange', true);
+  const [changeInterval, setChangeInterval] = usePersistentState(
+    'changeInterval',
     DEFAULT_SLIDESHOW_INTERVAL,
+    (value) => SLIDESHOW_INTERVALS.includes(value as number),
   );
   // Bumped on a manual shuffle, to restart the slideshow countdown.
   const [shuffleCount, setShuffleCount] = useState(0);
@@ -49,7 +69,6 @@ export default function Home() {
     collage,
     next: nextPicture,
     isError: isPictureError,
-    isOwnPhotos,
   } = useRandomCollage(bgMode === 'picture');
 
   useEffect(() => {
@@ -81,7 +100,7 @@ export default function Home() {
       }, crazyModeInterval);
       return () => clearInterval(interval);
     }
-  }, [crazyMode, crazyModeInterval, bgMode]);
+  }, [crazyMode, crazyModeInterval, bgMode, setColor]);
 
   // Picture slideshow. Paused while a photo is open in the lightbox.
   // biome-ignore lint/correctness/useExhaustiveDependencies: shuffleCount restarts the countdown after a manual shuffle
@@ -136,15 +155,6 @@ export default function Home() {
         crazyModeInterval={crazyModeInterval}
         onCrazyModeIntervalChange={setCrazyModeInterval}
         pictureStatus={pictureStatus}
-        // Only claim authorship once the app's own photos are in use, not
-        // before they load or during the Picsum fallback.
-        photoCredit={
-          collage
-            ? isOwnPhotos
-              ? 'All photos taken by Kazeem Quadri.'
-              : 'Photos by Unsplash photographers, via Lorem Picsum.'
-            : null
-        }
         onShufflePictures={() => {
           nextPicture();
           setShuffleCount((count) => count + 1);

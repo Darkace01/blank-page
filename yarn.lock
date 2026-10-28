@@ -1374,7 +1374,6 @@ __metadata:
     axios: "npm:^0.27.2"
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
-    image-size: "npm:^2"
     lucide-react: "npm:^1.62.0"
     next: "npm:16.4.3"
     postcss: "npm:^8.4.31"
@@ -1772,15 +1771,6 @@ __metadata:
   version: 2.1.0
   resolution: "human-signals@npm:2.1.0"
   checksum: 10c0/695edb3edfcfe9c8b52a76926cd31b36978782062c0ed9b1192b36bebc75c4c87c82e178dfcb0ed0fc27ca59d434198aac0bd0be18f5781ded775604db22304a
-  languageName: node
-  linkType: hard
-
-"image-size@npm:^2":
-  version: 2.0.4
-  resolution: "image-size@npm:2.0.4"
-  bin:
-    image-size: bin/image-size.js
-  checksum: 10c0/af01b8c2b7c536df1b866fc6daaa7e58ee909cde42fcae27562612ea77181f473445bc8acf0dfb5b9e8590e966a7a1f3f0fbf4c87ec6d1d4d60d68d87d529d76
   languageName: node
   linkType: hard
 
