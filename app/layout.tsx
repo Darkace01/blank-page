@@ -1,5 +1,6 @@
 import { Poppins } from 'next/font/google';
 import Script from 'next/script';
+import { IS_EXTENSION } from '@/lib/helpers';
 import './globals.css';
 import Providers from './providers';
 
@@ -38,19 +39,24 @@ export default function RootLayout({
         className='h-full w-full min-h-screen relative'
         // style={{ backgroundColor: '#000000' }}
       >
-        <Script
-          strategy='afterInteractive'
-          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
-        />
-        <Script id='ga-analytics'>
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
+        {/* Extensions can't load remote scripts, so the extension has no GA. */}
+        {!IS_EXTENSION && (
+          <>
+            <Script
+              strategy='afterInteractive'
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+            />
+            <Script id='ga-analytics'>
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
 
-            gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
-          `}
-        </Script>
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
+              `}
+            </Script>
+          </>
+        )}
         <Providers>{children}</Providers>
       </body>
     </html>

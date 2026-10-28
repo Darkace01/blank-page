@@ -32,7 +32,17 @@ yarn build    # production build, also runs the TypeScript check
 yarn lint     # biome lint .
 yarn check    # biome check . (lint + format + import sorting)
 yarn upload-backgrounds "<folder>"  # resize photos and upload them to Vercel Blob
+yarn build:extension  # Chrome and Firefox extension, in dist/
 ```
+
+## Browser extension
+
+`yarn build:extension` (`scripts/build-extension.mjs`) builds the same app as a Manifest V3 extension for Chrome and Firefox. It writes `dist/chrome/` and `dist/firefox/` (load unpacked) and a store-ready `.zip` of each. The extension opens Blank Page on every new tab (`chrome_url_overrides`) and from its toolbar button (`extension/background.js`).
+
+- **Static export:** `NEXT_PUBLIC_EXTENSION=1` switches `next.config.js` to `output: 'export'` into `.next-extension/`. `pageExtensions: ['tsx']` leaves out `app/api/backgrounds/route.ts`, so the extension fetches the photo list from the deployed site (`SITE_URL` in `lib/helpers.js`, which sends `Access-Control-Allow-Origin: *`). `IS_EXTENSION` also drops Google Analytics, because extensions can't load remote scripts.
+- **Post-processing:** Chrome refuses names starting with `_`, so `_next/` is renamed `next/`, references to it are rewritten, and other `_` files are dropped. MV3's CSP blocks inline scripts, so each one is moved to `next/inline/<hash>.js` and loaded from the same spot. The build fails if anything still references `/_next/`.
+- **Manifests:** generated in the script. They differ only in the background (a service worker for Chrome, `background.scripts` for Firefox) and Firefox's `browser_specific_settings` (add-on ID `blank-page@darkace01`, no data collection, Firefox 140+). The version comes from `package.json`, and the icons are rendered from an inline SVG with `sharp`.
+- **Settings:** stored in the extension's own localStorage, separate from the website's.
 
 There are no tests. Verify changes with `yarn lint` and `yarn build`, then check the page in a browser, at desktop and phone widths.
 

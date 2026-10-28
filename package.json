@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:extension": "node scripts/build-extension.mjs",
     "start": "next start",
     "lint": "biome lint .",
     "check": "biome check .",
