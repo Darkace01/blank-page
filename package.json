@@ -44,5 +44,6 @@
   },
   "overrides": {
     "@types/react": "19.3.0"
-  }
+  },
+  "packageManager": "yarn@4.18.1"
 }

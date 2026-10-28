@@ -44,11 +44,14 @@ const DESCRIPTION =
 // Firefox needs a fixed add-on ID.
 const GECKO_ID = 'blank-page@darkace01';
 
+// Sorted, so the zips come out byte-for-byte the same on every machine.
 const walk = (dir) =>
-  readdirSync(dir).flatMap((name) => {
-    const path = join(dir, name);
-    return statSync(path).isDirectory() ? walk(path) : [path];
-  });
+  readdirSync(dir)
+    .sort()
+    .flatMap((name) => {
+      const path = join(dir, name);
+      return statSync(path).isDirectory() ? walk(path) : [path];
+    });
 
 // 1. Static export.
 rmSync(OUT, { recursive: true, force: true });

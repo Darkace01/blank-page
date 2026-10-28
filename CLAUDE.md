@@ -43,6 +43,8 @@ yarn build:extension  # Chrome and Firefox extension, in dist/
 - **Post-processing:** Chrome refuses names starting with `_`, so `_next/` is renamed `next/`, references to it are rewritten, and other `_` files are dropped. MV3's CSP blocks inline scripts, so each one is moved to `next/inline/<hash>.js` and loaded from the same spot. The build fails if anything still references `/_next/`.
 - **Manifests:** generated in the script. They differ only in the background (a service worker for Chrome, `background.scripts` for Firefox) and Firefox's `browser_specific_settings` (add-on ID `blank-page@darkace01`, no data collection, Firefox 140+). The version comes from `package.json`, and the icons are rendered from an inline SVG with `sharp`.
 - **Settings:** stored in the extension's own localStorage, separate from the website's.
+- **Reproducible:** Firefox Add-ons reviewers rebuild from the source (instructions in `README.md`) and compare. So the build ID is fixed (`generateBuildId`), zip entries are sorted with fixed timestamps, and `packageManager` pins Yarn. Two builds, including one from a clean copy without `.env` files, give byte-identical zips. Keep it that way: nothing random, no env-dependent output.
+- **Store screenshots:** `extension/screenshots/` (1280×800, the Chrome Web Store size).
 
 There are no tests. Verify changes with `yarn lint` and `yarn build`, then check the page in a browser, at desktop and phone widths.
 

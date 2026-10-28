@@ -11,6 +11,9 @@ const nextConfig = {
     // app/api/backgrounds/route.ts, which a static export can't serve. The
     // extension uses the deployed site's route instead (`SITE_URL`).
     pageExtensions: ['tsx'],
+    // Next picks a random build ID by default. A fixed one keeps the build
+    // reproducible, which Firefox Add-ons reviewers check against the source.
+    generateBuildId: async () => 'extension',
   }),
 };
 
