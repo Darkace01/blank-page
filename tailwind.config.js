@@ -8,12 +8,27 @@ module.exports = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			// Poppins, loaded in app/layout.tsx; advanced mode's hover.dev style.
+  			brutal: ['var(--font-poppins)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			// Advanced mode's hover.dev palette. RGB channels set in
+  			// app/globals.css, swapped for dark ones under `.night`.
+  			brutal: {
+  				line: 'rgb(var(--brutal-line) / <alpha-value>)',
+  				shadow: 'rgb(var(--brutal-shadow) / <alpha-value>)',
+  				paper: 'rgb(var(--brutal-paper) / <alpha-value>)',
+  				text: 'rgb(var(--brutal-text) / <alpha-value>)',
+  				muted: 'rgb(var(--brutal-muted) / <alpha-value>)',
+  				soft: 'rgb(var(--brutal-soft) / <alpha-value>)',
+  				accent: 'rgb(var(--brutal-accent) / <alpha-value>)',
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

@@ -1,6 +1,14 @@
+import { Poppins } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import Providers from './providers';
+
+// Advanced mode's hover.dev-style panel and widgets (`font-brutal`).
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-poppins',
+});
 
 export const metadata = {
   title: 'Blank Page',
@@ -15,7 +23,7 @@ export default function RootLayout({
 }) {
   return (
     // `dark` selects the dark shadcn/ui theme (app/globals.css).
-    <html lang='en' className='dark'>
+    <html lang='en' className={`dark ${poppins.variable}`}>
       <head>
         <meta
           name='viewport'

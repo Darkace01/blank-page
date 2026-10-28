@@ -1,6 +1,18 @@
 # Blank Page
 
-A single-page Next.js app that fills a screen (typically a second monitor) with a solid colour or a slideshow of photo collages. The photos are Kazeem Quadri's own, stored in Vercel Blob. Extras: random colour, "crazy mode" (colour changes on an interval), a lightbox for each photo, fullscreen, a clock and an optional random quote card. All controls live in a sheet that slides in from the right, and settings are saved in the browser.
+A single-page Next.js app that fills a screen (typically a second monitor) with a solid colour, with all controls in a sheet that slides in from the right. Settings are saved in the browser.
+
+- **Basic mode (the default):** colour, random, black, clock and fullscreen.
+- **Advanced mode:** a toggle that switches the controls to a hover.dev-style neo-brutalist panel, with a light/dark/system theme, and unlocks:
+  - a slideshow of photo collages (Kazeem Quadri's own photos, from Vercel Blob) with a lightbox
+  - crazy mode (colours change on an interval)
+  - a random quote
+  - a focus timer and a breathing guide
+  - ambient noise
+  - a screen dimmer and warm light
+  - a developer toolkit (passwords, tokens, UUIDs, hashes, Base64, URL encoding, JWT, JSON, timestamps)
+
+Keyboard shortcuts work in both modes.
 
 ## Stack
 
@@ -26,20 +38,54 @@ There are no tests. Verify changes with `yarn lint` and `yarn build`, then check
 
 ## Layout
 
-- `app/layout.tsx`: root layout. Sets metadata, loads Google Analytics via `next/script` (`NEXT_PUBLIC_GA_ID` from `.env`), wraps children in `Providers`. `<html class="dark">` selects the dark shadcn theme.
+- `app/layout.tsx`: root layout.
+  - Sets metadata, loads Google Analytics via `next/script` (`NEXT_PUBLIC_GA_ID` from `.env`), and wraps children in `Providers`.
+  - Loads Poppins with `next/font/google` as `--font-poppins` (Tailwind's `font-brutal`).
+  - `<html class="dark">` selects the dark shadcn theme, used by basic mode. Advanced mode's own dark theme is a separate `night` class, added and removed by the page.
 - `app/providers.tsx`: client component that creates the `QueryClient` (`refetchOnWindowFocus: false`).
-- `app/page.tsx`: the page and all app state: colour, `bgMode` (`'color' | 'picture'`), crazy mode and its interval, the slideshow (`autoChange`, `changeInterval`), clock, quote, fullscreen, and whether the lightbox is open.
-  - **Saved settings:** everything except fullscreen and the lightbox uses `usePersistentState` (see `lib/usePersistentState.ts`), so it survives a refresh. Fullscreen isn't saved, because browsers only allow entering it from a click. Several settings pass a validator (hex colour, a known `bgMode`, crazy speed 100–10000, an interval from `SLIDESHOW_INTERVALS`), so a bad stored value falls back to the default.
-  - **Crazy mode** only cycles colours, and only in colour mode. Pictures have their own slideshow effect.
+- `lib/settings.tsx`: every saved setting, in `useSettingsState()`, each a `usePersistentState` with a validator, so a bad stored value falls back to the default. The page calls it once and shares it through `SettingsProvider`, and components read it with `useSettings()`.
+  - **Settings:** `advanced`, `theme`, `color`, `showClock`, `bgMode`, `crazyMode` and its interval, the slideshow (`autoChange`, `changeInterval`), `showQuote`, `showTimer` and `timerMinutes`, `showBreathing`, `ambientSound` and `ambientVolume`, `dim` and `warmLight`.
+  - **Not saved:** fullscreen (browsers only allow entering it from a click), the lightbox, open dialogs and the hidden-UI toggle.
+- `app/page.tsx`: wires everything together.
+  - **Basic mode:** `advanced` gates every advanced feature. While it's off, the page uses `bgMode = 'color'`, no quote, timer, breathing or sound, and no dimmer or warm light. The advanced settings are kept, so they return when advanced mode is switched back on.
+  - **Dark theme:** while advanced mode is on, the page toggles `night` on `<html>` from `theme`. With `'system'` it follows `prefers-color-scheme`, including live changes.
+  - **Crazy mode** cycles colours (advanced mode, colour background only).
   - **Slideshow:** calls `next()` every `changeInterval` (default 10s, from `SLIDESHOW_INTERVALS` in `lib/helpers.js`; the shortest is 5s). It pauses while the lightbox is open. A manual shuffle bumps `shuffleCount` to restart the countdown (that dependency is biome-ignore'd on purpose).
+  - **Keyboard shortcuts:** Space for a random colour or shuffle, F fullscreen, B black, H to hide the clock and widgets, D for the developer toolkit (advanced only). They're ignored while typing, on sliders and selects, inside any dialog, and with Ctrl/Alt/Meta. Space on a focused button is left to the button. The listener is re-bound every render (no dependency list), so the handlers always see current state.
   - **Fullscreen:** a `fullscreenchange` listener keeps the toggle in sync when fullscreen is left with Esc.
-  - **Footer credit:** `FooterCredit` only shows in colour mode, because in picture mode the bottom-right corner holds a photo's lightbox button. The credit also appears in the sheet.
+  - **Layering:** the collage (and quote, z-10) sit under `ScreenFilters` (z-15). The clock, timer (top-left; `top-16` on phones to clear the clock), breathing guide (bottom-centre) and controls button sit above at z-20.
+  - **Footer credit:** `FooterCredit` only shows with a colour background, because in picture mode the bottom-right corner holds a photo's lightbox button.
   - DOM helpers (`isIOSDevice`, `requestFullScreen`, `exitFullscreen`) sit at module scope so effects don't need them as dependencies.
-- `components/ControlsSheet.tsx`: every control, in a shadcn `Sheet` (side right, `w-[88vw] sm:max-w-sm`, so it's near full width on phones). It's opened by a round button fixed top-right, faded (`opacity-40`) until hovered or focused.
-  - **Tabs:** Colour has a colour picker, Random, Black, and a crazy mode switch with a speed slider. Pictures has Shuffle, the photo count, an auto-change switch and an interval select.
-  - **Display:** switches for the clock, quote and fullscreen.
-  - **Credits:** "Developed by Kazeem Quadri" and "All photos taken by Kazeem Quadri."
-  - The page passes in state and handlers as props, and the sheet holds no state of its own.
+- `components/ControlsSheet.tsx`: the trigger button (top-right) and the shadcn `Sheet`, which the page controls so the toolkit can close it before opening. It shows one of two panels.
+  - **Basic:** a round, faded trigger and `controls/BasicControls.tsx`: a dark shadcn panel with colour, Random, Black, clock, fullscreen and a "Switch to advanced mode" card.
+  - **Advanced:** a square indigo trigger with a hard shadow and `controls/AdvancedControls.tsx` on grid paper. The panel has:
+    - a header card with the advanced toggle and Light / Dark / Auto theme buttons
+    - Background (colour or pictures, with their options)
+    - Focus (timer, breathing, quote)
+    - Ambient sound
+    - Screen (dim, warm light, clock, fullscreen)
+    - Developer toolkit
+    - a shortcuts list (`SHORTCUTS`)
+  - **Credits:** `controls/Credits.tsx` holds "Developed by". The `photos` prop adds "All photos taken by Kazeem Quadri", in advanced mode only.
+- `components/brutal.tsx`: the advanced-mode building blocks in hover.dev's neo-brutalist style: `BrutalCard`, `BrutalButton` (`primary`, `dark`, `light`, `active`), `BrutalLabel`, `BrutalSwitch`, `BrutalSlider`, `BrutalRow`, and class names for restyling shadcn's Select.
+  - **Cut corner:** clipping a single element would cut away its border along the diagonal. So cards and buttons stack three clipped layers (the offset shadow, a border-coloured layer and the face), and the face's cut is about 1px smaller so the 2px border shows along the diagonal too.
+  - **Pressed effect:** a button's face slides onto its shadow on hover, focus and press.
+- `components/widgets/`:
+  - `FocusTimer.tsx`: work for `timerMinutes`, then a 5 minute break (`BREAK_MINUTES`), repeating. It counts against a wall-clock end time, so it stays accurate in background tabs. It plays a chime at each switch (`playChime`) and shows the countdown in the tab title while running. Changing the work length resets it only when it isn't running; `workMinutes` is the only trigger, so pausing doesn't reset it.
+  - `BreathingGuide.tsx`: box breathing, 4s each for in, hold, out, hold. The square uses the CSS `breathe` animation (16s, in `app/globals.css`), and the label and countdown follow the same cycle from mount.
+  - `ScreenFilters.tsx`: the dimmer (black at `dim` opacity, up to 80%) and the warm light (an amber multiply layer), with `pointer-events-none`.
+- `lib/useAmbientNoise.ts`: `useAmbientNoise(sound, volume)` plays looping white, pink (Paul Kellet's filter) or brown (leaky random walk) noise, generated with the Web Audio API, so there are no audio files.
+  - Changes fade in and out.
+  - Browsers block audio until a user gesture, so a sound restored on load starts on the first click or key press.
+  - Also exports `playChime()` for the timer.
+- `components/devtools/DevToolkit.tsx`: the developer toolkit, a shadcn `Dialog` styled after hover.dev's app-window mockup: title bar with traffic lights, a sidebar (Generate / Encode / Inspect, a scrolling row on phones), and the tool on grid paper. The tool UIs are in `components/devtools/tools.tsx`, and the logic in `lib/devtools.ts`.
+  - **Pure functions:** the logic is easy to test from Node 24, which runs `.ts` directly.
+  - **Randomness:** always `crypto.getRandomValues`, with rejection sampling (`randomInt`) to avoid modulo bias, so there's no `Math.random`.
+  - **Passwords:** guarantee one character from each chosen set and are then shuffled. Entropy is `length × log2(pool)`.
+  - **Encoding and hashing:** Base64 is UTF-8 safe, and hashes use `crypto.subtle.digest`.
+  - **JWT:** decoded only, and the signature is **not** verified (the UI says so).
+  - **Timestamps:** numbers above 1e11 are read as milliseconds, below as seconds.
+  - **Privacy:** nothing leaves the browser.
 - `components/PictureCollage.tsx`: the collage, inset `COLLAGE_INSET_VMIN` (1.5vmin, the same as the tile gap) from the viewport edges. The controls button and clock overlay it, so it uses the full height.
   - **Skeleton:** collage-shaped shadcn `Skeleton` blocks show until the first collage loads, or an error message if it can't.
   - **Layers:** each collage records the box size it was laid out for (`boxWidth`/`boxHeight`). Each layer keeps that aspect ratio and is fitted, centred, into the container with container query units (`containerType: 'size'`), so a window resize scales it evenly.
@@ -113,4 +159,5 @@ The current store holds 103 photos (55MB, resized from 88MB of originals), 87 of
 - Mark client components with `'use client'`. Import with the `@/` path alias (`@/components/...`, `@/lib/...`).
 - Use `import type` for type-only imports (Biome enforces it).
 - Tailwind utility classes inline. No CSS modules. Build new UI from the shadcn components in `components/ui/` (add more with the v3 CLI above) and lucide icons.
+- Advanced-mode UI uses the `brutal-*` colours (`border-brutal-line`, `bg-brutal-paper`, `text-brutal-text`, `text-brutal-muted`, `bg-brutal-soft`, `text-brutal-accent`, `bg-brutal-shadow`) and `shadow-[Npx_Npx_0_0_rgb(var(--brutal-shadow))]`, never `black`/`white`/`#000`. Those tokens are what dark mode (`.night` in `app/globals.css`) swaps. The exceptions are the indigo-600 accent fills and text on fixed light badges (e.g. `bg-emerald-300 text-black`). Build new advanced UI from `components/brutal.tsx`.
 - Don't add a fast-interval quote refetch to crazy mode: the interval can be as low as 100ms and would flood the API.

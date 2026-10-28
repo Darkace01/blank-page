@@ -64,6 +64,82 @@
   }
 }
 
+/* Advanced mode's hover.dev palette (the `brutal-*` colours in
+   tailwind.config.js), as RGB channels. `.night` on <html> switches to the dark
+   version: near-black cards, light borders and indigo offset shadows, since
+   black shadows would vanish on a dark background. */
+:root {
+  --brutal-line: 0 0 0;
+  --brutal-shadow: 0 0 0;
+  --brutal-paper: 255 255 255;
+  --brutal-text: 0 0 0;
+  --brutal-muted: 82 82 91;
+  --brutal-soft: 224 231 255;
+  --brutal-accent: 79 70 229;
+  --brutal-grid-bg: #eef2ff;
+  --brutal-grid-line: rgb(0 0 0 / 0.07);
+  --brutal-hero-bg: #a5b4fc;
+  --brutal-hero-line: rgb(0 0 0 / 0.85);
+}
+
+.night {
+  --brutal-line: 212 212 216;
+  --brutal-shadow: 99 102 241;
+  --brutal-paper: 24 24 27;
+  --brutal-text: 244 244 245;
+  --brutal-muted: 161 161 170;
+  --brutal-soft: 30 27 75;
+  --brutal-accent: 129 140 248;
+  --brutal-grid-bg: #09090b;
+  --brutal-grid-line: rgb(255 255 255 / 0.07);
+  --brutal-hero-bg: #312e81;
+  --brutal-hero-line: rgb(0 0 0 / 0.55);
+}
+
+/* Grid-paper backgrounds for advanced mode (hover.dev style). */
+.grid-paper {
+  background-color: var(--brutal-grid-bg);
+  background-image:
+    linear-gradient(to right, var(--brutal-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--brutal-grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.grid-paper-indigo {
+  background-color: var(--brutal-hero-bg);
+  background-image:
+    linear-gradient(to right, var(--brutal-hero-line) 2px, transparent 2px),
+    linear-gradient(to bottom, var(--brutal-hero-line) 2px, transparent 2px);
+  background-size: 28px 28px;
+}
+
+/* Breathing guide: a 16s box-breathing cycle (in 4s, hold 4s, out 4s, hold
+   4s), matching the phases in components/widgets/BreathingGuide.tsx. */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.45);
+  }
+  25%,
+  50% {
+    transform: scale(1);
+  }
+  75% {
+    transform: scale(0.45);
+  }
+}
+
+.breathing-square {
+  animation: breathe 16s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathing-square {
+    animation: none;
+    transform: scale(0.75);
+  }
+}
+
 /* shadcn/ui theme (zinc), as HSL channels: tailwind.config.js wraps each in
    hsl(var(--x)). The app always uses the dark theme (<html class="dark">). */
 @layer base {
