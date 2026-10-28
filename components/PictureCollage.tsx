@@ -18,16 +18,21 @@ type Tile = {
 
 export type Collage = {
   id: number;
+  // 'gallery': a single photo, shown whole over a blurred copy of itself.
+  layout: 'collage' | 'gallery';
   // Size of the box the tiles were laid out for (CSS px).
   boxWidth: number;
   boxHeight: number;
-  transition: 'rise' | 'zoom' | 'slide';
+  // Entry animation: rise/zoom/slide for collages; fade, kenburns, slide,
+  // zoom, blur or flip for the gallery (keyframes in app/globals.css).
+  transition: string;
   tiles: Tile[];
 };
 
-// How long the outgoing collage stays mounted while it fades out (matches
-// .collage-leaving in globals.css).
-const LEAVE_MS = 700;
+// How long the outgoing layer stays mounted: a collage fades out over 700ms
+// (.collage-leaving); a gallery photo stays fully visible under the new one
+// until its 1100ms entry (.gallery-enter) has finished (globals.css).
+const LEAVE_MS = { collage: 700, gallery: 1150 };
 const TILE_STAGGER_MS = 90;
 // Gap between tiles/skeleton blocks; the same as the outer inset.
 const GAP = `${COLLAGE_INSET_VMIN}vmin`;
@@ -154,6 +159,72 @@ function CollageLayer({
   );
 }
 
+// Gallery: one photo, whole (object-contain) over a blurred, darkened copy of
+// itself that fills the frame. The layer enters on top with the collage's
+// gallery transition while the previous photo stays visible beneath it; with
+// 'kenburns' the photo also drifts slowly while it's on screen.
+function GalleryLayer({
+  collage,
+  leaving,
+  onOpen,
+}: {
+  collage: Collage;
+  leaving?: boolean;
+  onOpen?: (index: number) => void;
+}) {
+  const tile = collage.tiles[0];
+  return (
+    <div
+      className={`group absolute inset-0 overflow-hidden rounded-md ${
+        leaving
+          ? 'gallery-leaving pointer-events-none'
+          : `gallery-enter gallery-${collage.transition}`
+      }`}
+    >
+      {/* biome-ignore lint/performance/noImgElement: same preloaded Blob URL as the photo */}
+      <img
+        src={tile.src}
+        alt=''
+        aria-hidden
+        className='absolute inset-0 h-full w-full scale-110 object-cover blur-2xl brightness-[0.45]'
+      />
+      <div
+        className={`absolute inset-0 flex items-center justify-center p-[3vmin] ${
+          !leaving && collage.transition === 'kenburns'
+            ? 'gallery-kenburns-drift'
+            : ''
+        }`}
+      >
+        {/* biome-ignore lint/performance/noImgElement: preloaded by exact URL; next/image would fetch it again */}
+        <img
+          src={tile.src}
+          alt={`By ${tile.author}`}
+          className='max-h-full max-w-full rounded-md object-contain shadow-2xl'
+        />
+      </div>
+      <a
+        href={tile.link}
+        target='_blank'
+        rel='noopener noreferrer'
+        className={`absolute bottom-2 left-2 rounded bg-black/50 px-1.5 py-0.5 text-xs text-white ${HOVER_REVEAL}`}
+      >
+        {tile.author}
+      </a>
+      {onOpen && (
+        <button
+          type='button'
+          onClick={() => onOpen(0)}
+          aria-label={`View photo by ${tile.author} larger`}
+          title='View larger'
+          className={`absolute bottom-2 right-2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70 ${HOVER_REVEAL}`}
+        >
+          <Maximize2 className='h-4 w-4' />
+        </button>
+      )}
+    </div>
+  );
+}
+
 function Lightbox({
   tiles,
   index,
@@ -255,9 +326,23 @@ export default function PictureCollage({
 
   useEffect(() => {
     if (!leaving) return;
-    const timeout = setTimeout(() => setLeaving(null), LEAVE_MS);
+    const timeout = setTimeout(
+      () => setLeaving(null),
+      LEAVE_MS[leaving.layout],
+    );
     return () => clearTimeout(timeout);
   }, [leaving]);
+
+  // Keyed by collage id, so each new one mounts fresh and plays its entry.
+  const renderLayer = (
+    layer: Collage,
+    props: { leaving?: boolean; onOpen?: (index: number) => void },
+  ) =>
+    layer.layout === 'gallery' ? (
+      <GalleryLayer key={layer.id} collage={layer} {...props} />
+    ) : (
+      <CollageLayer key={layer.id} collage={layer} {...props} />
+    );
 
   const openLightbox = (index: number | null) => {
     setLightboxIndex(index);
@@ -278,14 +363,8 @@ export default function PictureCollage({
         ) : (
           <CollageSkeleton />
         ))}
-      {leaving && <CollageLayer key={leaving.id} collage={leaving} leaving />}
-      {collage && (
-        <CollageLayer
-          key={collage.id}
-          collage={collage}
-          onOpen={openLightbox}
-        />
-      )}
+      {leaving && renderLayer(leaving, { leaving: true })}
+      {collage && renderLayer(collage, { onOpen: openLightbox })}
       {collage && (
         <Lightbox
           tiles={collage.tiles}

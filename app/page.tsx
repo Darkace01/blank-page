@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import QuoteCard from '@/components/QuoteCard';
 import FooterCredit from '@/components/FooterCredit';
 import ControlsSheet from '@/components/ControlsSheet';
@@ -8,8 +8,9 @@ import DevToolkit from '@/components/devtools/DevToolkit';
 import BreathingGuide from '@/components/widgets/BreathingGuide';
 import FocusTimer from '@/components/widgets/FocusTimer';
 import ScreenFilters from '@/components/widgets/ScreenFilters';
+import Walkthrough, { hasSeenWalkthrough } from '@/components/Walkthrough';
 import dynamic from 'next/dynamic';
-import { randomColor } from '@/lib/helpers';
+import { QUOTE_MIN_INTERVAL, randomColor } from '@/lib/helpers';
 import { SettingsProvider, useSettingsState } from '@/lib/settings';
 import { useAmbientNoise } from '@/lib/useAmbientNoise';
 import { useQueryClient } from '@tanstack/react-query';
@@ -70,6 +71,7 @@ export default function Home() {
   const [fullScrren, setFullScreen] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [devToolsOpen, setDevToolsOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   // Hides the clock and widgets (H); not saved, so a refresh brings them back.
   const [uiHidden, setUiHidden] = useState(false);
   // Bumped on a manual shuffle, to restart the slideshow countdown.
@@ -80,7 +82,10 @@ export default function Home() {
     collage,
     next: nextPicture,
     isError: isPictureError,
-  } = useRandomCollage(bgMode === 'picture');
+  } = useRandomCollage(bgMode === 'picture', {
+    layout: settings.photoLayout,
+    photoCount: settings.photoCount,
+  });
 
   useAmbientNoise(ambientSound, settings.ambientVolume);
 
@@ -119,6 +124,18 @@ export default function Home() {
     }
   }, [fullScrren]);
 
+  // First visit: show the walkthrough once the page has settled.
+  useEffect(() => {
+    if (hasSeenWalkthrough()) return;
+    const timeout = setTimeout(() => setTourOpen(true), 600);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const startTour = () => {
+    setControlsOpen(false);
+    setTourOpen(true);
+  };
+
   // Keep the toggle in sync when fullscreen is left another way (e.g. Esc).
   useEffect(() => {
     const sync = () => setFullScreen(Boolean(document.fullscreenElement));
@@ -145,21 +162,31 @@ export default function Home() {
     }
   }, [bgMode, autoChange, changeInterval, lightboxOpen, nextPicture, shuffleCount]);
 
-  const refreshQuote = () => {
-    if (showQuote) {
-      queryClient.refetchQueries({ queryKey: QUOTE_QUERY_KEY });
-    }
-  };
+  // A new quote whenever the background changes: a new colour (random, black,
+  // picker, crazy mode) or new photos (shuffle, slideshow). Colour changes are
+  // throttled to one quote every QUOTE_MIN_INTERVAL, since crazy mode can
+  // change colour every 100ms. Photos change at most every 5s anyway, so each
+  // change gets a new quote.
+  const backgroundKey =
+    bgMode === 'picture' ? `collage-${collage?.id ?? 'none'}` : color;
+  const lastBackgroundKey = useRef(backgroundKey);
+  const lastQuoteAt = useRef(0);
+  useEffect(() => {
+    if (backgroundKey === lastBackgroundKey.current) return;
+    lastBackgroundKey.current = backgroundKey;
+    if (!showQuote) return;
+    const throttled =
+      bgMode === 'color' && Date.now() - lastQuoteAt.current < QUOTE_MIN_INTERVAL;
+    if (throttled) return;
+    lastQuoteAt.current = Date.now();
+    queryClient.refetchQueries({ queryKey: QUOTE_QUERY_KEY });
+  }, [backgroundKey, bgMode, showQuote, queryClient]);
 
-  const randomizeColor = () => {
-    setColor(randomColor());
-    refreshQuote();
-  };
+  const randomizeColor = () => setColor(randomColor());
 
   const shufflePictures = () => {
     nextPicture();
     setShuffleCount((count) => count + 1);
-    refreshQuote();
   };
 
   const openDevTools = () => {
@@ -171,6 +198,14 @@ export default function Home() {
   // re-bound each render so the handlers always see current state.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      // Ctrl+/ or Cmd+/ toggles the developer toolkit from anywhere, even
+      // while typing or inside a dialog.
+      if ((event.ctrlKey || event.metaKey) && event.key === '/') {
+        event.preventDefault();
+        setControlsOpen(false);
+        setDevToolsOpen((open) => !open);
+        return;
+      }
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       if (isTypingTarget(event.target)) return;
       switch (event.key.toLowerCase()) {
@@ -191,7 +226,7 @@ export default function Home() {
           setUiHidden((hidden) => !hidden);
           break;
         case 'd':
-          if (advanced) openDevTools();
+          openDevTools();
           break;
       }
     };
@@ -247,12 +282,19 @@ export default function Home() {
           onRandomColor={randomizeColor}
           onShufflePictures={shufflePictures}
           onOpenDevTools={openDevTools}
+          onStartTour={startTour}
           fullScreen={fullScrren}
           onFullScreenChange={setFullScreen}
         />
-        {advanced && (
-          <DevToolkit open={devToolsOpen} onOpenChange={setDevToolsOpen} />
-        )}
+        <Walkthrough
+          open={tourOpen}
+          onClose={() => setTourOpen(false)}
+          onTryAdvanced={() => {
+            settings.setAdvanced(true);
+            setControlsOpen(true);
+          }}
+        />
+        <DevToolkit open={devToolsOpen} onOpenChange={setDevToolsOpen} />
         {/* In picture mode the corner belongs to a photo's lightbox button; the
             credit is in the controls sheet instead. */}
         {bgMode === 'color' && <FooterCredit />}

@@ -2,11 +2,13 @@
 import { useQuote } from '../lib/apiHelpers';
 import type { Quote } from '../types';
 
+// The quote follows background changes (see app/page.tsx). While the next one
+// loads, the current one stays up; the skeleton only shows before the first.
 function QuoteCard() {
-  const { data, isFetching, isError } = useQuote();
+  const { data, isError } = useQuote();
 
   const { content, author } = (data ?? {}) as Quote;
-  if (isError)
+  if (isError && !content)
     return (
       <div className='text-white bg-black bg-opacity-20 rounded-lg p-10 space-x-3 min-h-[15rem] max-w-4xl items-center justify-center align-middle flex'>
         <div>
@@ -16,7 +18,7 @@ function QuoteCard() {
       </div>
     );
 
-  if (isFetching || !content || !author)
+  if (!content || !author)
     return (
       <div className='text-white bg-black bg-opacity-20 rounded-lg p-10 space-x-3 min-h-[15rem] max-w-4xl items-center justify-center align-middle flex'>
         <div className='animate-pulse flex space-x-4'>
@@ -33,7 +35,8 @@ function QuoteCard() {
     );
   return (
     <div className='text-white bg-black bg-opacity-20 rounded-lg p-10 space-x-3 min-h-[15rem] max-w-4xl items-center justify-center align-middle flex'>
-      <div>
+      {/* Keyed by the quote, so each new one fades in. */}
+      <div key={content} className='animate-in fade-in duration-700'>
         <div className='text-center italic text-3xl font-light'>{content}</div>
         <div className='text-md font-bold text-center'> - {author}</div>
       </div>

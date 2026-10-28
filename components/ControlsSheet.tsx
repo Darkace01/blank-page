@@ -17,6 +17,7 @@ export default function ControlsSheet({
   onRandomColor,
   onShufflePictures,
   onOpenDevTools,
+  onStartTour,
   fullScreen,
   onFullScreenChange,
 }: {
@@ -26,6 +27,7 @@ export default function ControlsSheet({
   onRandomColor: () => void;
   onShufflePictures: () => void;
   onOpenDevTools: () => void;
+  onStartTour: () => void;
   fullScreen: boolean;
   onFullScreenChange: (on: boolean) => void;
 }) {
@@ -37,6 +39,7 @@ export default function ControlsSheet({
         {advanced ? (
           <button
             type='button'
+            data-tour='controls'
             aria-label='Open controls'
             title='Controls'
             className='fixed right-3 top-3 z-20 flex h-10 w-10 items-center justify-center border-2 border-brutal-line bg-indigo-600 text-white opacity-60 shadow-[3px_3px_0_0_rgb(var(--brutal-shadow))] transition-all hover:translate-x-[3px] hover:translate-y-[3px] hover:opacity-100 hover:shadow-none focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white'
@@ -47,6 +50,7 @@ export default function ControlsSheet({
           <Button
             variant='secondary'
             size='icon'
+            data-tour='controls'
             aria-label='Open controls'
             title='Controls'
             className='fixed right-3 top-3 z-20 rounded-full bg-black/40 text-white opacity-40 shadow-lg backdrop-blur transition-opacity hover:bg-black/60 hover:opacity-100 focus-visible:opacity-100'
@@ -68,11 +72,13 @@ export default function ControlsSheet({
             onRandomColor={onRandomColor}
             onShufflePictures={onShufflePictures}
             onOpenDevTools={onOpenDevTools}
+            onStartTour={onStartTour}
             fullScreen={fullScreen}
             onFullScreenChange={onFullScreenChange}
           />
         ) : (
           <BasicControls
+            onStartTour={onStartTour}
             onRandomColor={onRandomColor}
             fullScreen={fullScreen}
             onFullScreenChange={onFullScreenChange}

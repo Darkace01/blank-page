@@ -56,11 +56,97 @@
   }
 }
 
+/* Gallery transitions: one photo replaces another as a whole. The new layer
+   enters on top with one of these (chosen in lib/apiHelpers.js, never the same
+   twice in a row) while the old one fades out beneath it. */
+.gallery-enter {
+  animation-duration: 1100ms;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation-fill-mode: both;
+}
+
+.gallery-fade,
+.gallery-kenburns {
+  animation-name: gallery-fade;
+}
+
+.gallery-slide {
+  animation-name: gallery-slide;
+}
+
+.gallery-zoom {
+  animation-name: gallery-zoom;
+}
+
+.gallery-blur {
+  animation-name: gallery-blur;
+}
+
+.gallery-flip {
+  animation-name: gallery-flip;
+}
+
+/* Ken Burns: a slow pan and zoom while the photo is on screen. */
+.gallery-kenburns-drift {
+  animation: gallery-drift 20s ease-out both;
+}
+
+/* The outgoing photo stays fully visible underneath until the new one has
+   finished entering, then it's removed. Fading both at once would dip
+   through to the background halfway. */
+.gallery-leaving {
+  animation: none;
+}
+
+@keyframes gallery-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes gallery-slide {
+  from {
+    opacity: 0;
+    transform: translateX(8%);
+  }
+}
+
+@keyframes gallery-zoom {
+  from {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes gallery-blur {
+  from {
+    opacity: 0;
+    filter: blur(24px);
+  }
+}
+
+@keyframes gallery-flip {
+  from {
+    opacity: 0;
+    transform: perspective(1400px) rotateY(-28deg) scale(0.92);
+  }
+}
+
+@keyframes gallery-drift {
+  to {
+    transform: scale(1.08) translate(-1.5%, -1%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .collage-tile,
-  .collage-leaving {
+  .collage-leaving,
+  .gallery-enter {
     animation-duration: 1ms;
     animation-delay: 0ms;
+  }
+  .gallery-kenburns-drift {
+    animation: none;
   }
 }
 

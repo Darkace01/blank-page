@@ -4,7 +4,7 @@ A single-page Next.js app that fills a screen (typically a second monitor) with 
 
 - **Basic mode (the default):** colour, random, black, clock and fullscreen.
 - **Advanced mode:** a toggle that switches the controls to a hover.dev-style neo-brutalist panel, with a light/dark/system theme, and unlocks:
-  - a slideshow of photo collages (Kazeem Quadri's own photos, from Vercel Blob) with a lightbox
+  - a photo slideshow (Kazeem Quadri's own photos, from Vercel Blob): a collage of 1–6 photos or auto, or a gallery of one photo at a time, with varied transitions and a lightbox
   - crazy mode (colours change on an interval)
   - a random quote
   - a focus timer and a breathing guide
@@ -12,7 +12,7 @@ A single-page Next.js app that fills a screen (typically a second monitor) with 
   - a screen dimmer and warm light
   - a developer toolkit (passwords, tokens, UUIDs, hashes, Base64, URL encoding, JWT, JSON, timestamps)
 
-Keyboard shortcuts work in both modes.
+Keyboard shortcuts and the toolkit (Ctrl+/ or ⌘+/) work in both modes. First-time visitors get a short walkthrough guide.
 
 ## Stack
 
@@ -44,18 +44,24 @@ There are no tests. Verify changes with `yarn lint` and `yarn build`, then check
   - `<html class="dark">` selects the dark shadcn theme, used by basic mode. Advanced mode's own dark theme is a separate `night` class, added and removed by the page.
 - `app/providers.tsx`: client component that creates the `QueryClient` (`refetchOnWindowFocus: false`).
 - `lib/settings.tsx`: every saved setting, in `useSettingsState()`, each a `usePersistentState` with a validator, so a bad stored value falls back to the default. The page calls it once and shares it through `SettingsProvider`, and components read it with `useSettings()`.
-  - **Settings:** `advanced`, `theme`, `color`, `showClock`, `bgMode`, `crazyMode` and its interval, the slideshow (`autoChange`, `changeInterval`), `showQuote`, `showTimer` and `timerMinutes`, `showBreathing`, `ambientSound` and `ambientVolume`, `dim` and `warmLight`.
-  - **Not saved:** fullscreen (browsers only allow entering it from a click), the lightbox, open dialogs and the hidden-UI toggle.
+  - **Settings:** `advanced`, `theme`, `color`, `showClock`, `bgMode`, `photoLayout` (`'collage' | 'gallery'`) and `photoCount` (0 = auto, or 1–6), `crazyMode` and its interval, the slideshow (`autoChange`, `changeInterval`), `showQuote`, `showTimer` and `timerMinutes`, `showBreathing`, `ambientSound` and `ambientVolume`, `dim` and `warmLight`.
+  - **Not saved:** fullscreen (browsers only allow entering it from a click), the lightbox, open dialogs and the hidden-UI toggle. The walkthrough's "seen" flag (`blank-page:tourSeen`) is stored by `components/Walkthrough.tsx` itself, read directly before deciding to show, so returning visitors never get a flash of it.
 - `app/page.tsx`: wires everything together.
   - **Basic mode:** `advanced` gates every advanced feature. While it's off, the page uses `bgMode = 'color'`, no quote, timer, breathing or sound, and no dimmer or warm light. The advanced settings are kept, so they return when advanced mode is switched back on.
   - **Dark theme:** while advanced mode is on, the page toggles `night` on `<html>` from `theme`. With `'system'` it follows `prefers-color-scheme`, including live changes.
   - **Crazy mode** cycles colours (advanced mode, colour background only).
   - **Slideshow:** calls `next()` every `changeInterval` (default 10s, from `SLIDESHOW_INTERVALS` in `lib/helpers.js`; the shortest is 5s). It pauses while the lightbox is open. A manual shuffle bumps `shuffleCount` to restart the countdown (that dependency is biome-ignore'd on purpose).
-  - **Keyboard shortcuts:** Space for a random colour or shuffle, F fullscreen, B black, H to hide the clock and widgets, D for the developer toolkit (advanced only). They're ignored while typing, on sliders and selects, inside any dialog, and with Ctrl/Alt/Meta. Space on a focused button is left to the button. The listener is re-bound every render (no dependency list), so the handlers always see current state.
+  - **Keyboard shortcuts:** Space for a random colour or shuffle, F fullscreen, B black, H to hide the clock and widgets, D for the developer toolkit. They're ignored while typing, on sliders and selects, inside any dialog, and with Ctrl/Alt/Meta. The exception is Ctrl+/ or ⌘+/, which toggles the toolkit from anywhere, even while typing or inside a dialog. The toolkit is mounted in both modes. Space on a focused button is left to the button. The listener is re-bound every render (no dependency list), so the handlers always see current state.
   - **Fullscreen:** a `fullscreenchange` listener keeps the toggle in sync when fullscreen is left with Esc.
   - **Layering:** the collage (and quote, z-10) sit under `ScreenFilters` (z-15). The clock, timer (top-left; `top-16` on phones to clear the clock), breathing guide (bottom-centre) and controls button sit above at z-20.
   - **Footer credit:** `FooterCredit` only shows with a colour background, because in picture mode the bottom-right corner holds a photo's lightbox button.
   - DOM helpers (`isIOSDevice`, `requestFullScreen`, `exitFullscreen`) sit at module scope so effects don't need them as dependencies.
+  - **Quote:** follows the background. An effect watches `backgroundKey` (the colour in colour mode, the collage id in picture mode) and refetches the quote when it changes. Colour changes are throttled to one quote per `QUOTE_MIN_INTERVAL` (5s), because crazy mode can change colour every 100ms. Photo changes always get a new quote (they're at least 5s apart). Random and Shuffle don't fetch quotes themselves.
+  - **Walkthrough:** opened 600ms after a first visit (`hasSeenWalkthrough()`), and replayable from either panel via `startTour`. "Try it" on its last step switches on advanced mode and opens the controls.
+- `components/Walkthrough.tsx`: the first-visit guide, 4 steps: welcome, the controls button, shortcuts, advanced mode.
+  - **Spotlight:** steps with a `target` light up any element with a matching `data-tour` attribute (both controls triggers have `data-tour='controls'`) using a bordered box with a huge `box-shadow` that darkens the rest of the screen. It's a border, not a Tailwind `ring`, because rings are drawn with box-shadow and the inline shadow would replace them.
+  - **Card position:** below the target, or centred. An outer box positions it and an inner box animates, because the entry animation's transform would replace the centring transform.
+  - **Keys:** Escape or ✕ skips, and both skipping and finishing mark it seen. Focus moves into the guide, so the app's shortcuts stay quiet while it's open.
 - `components/ControlsSheet.tsx`: the trigger button (top-right) and the shadcn `Sheet`, which the page controls so the toolkit can close it before opening. It shows one of two panels.
   - **Basic:** a round, faded trigger and `controls/BasicControls.tsx`: a dark shadcn panel with colour, Random, Black, clock, fullscreen and a "Switch to advanced mode" card.
   - **Advanced:** a square indigo trigger with a hard shadow and `controls/AdvancedControls.tsx` on grid paper. The panel has:
@@ -92,11 +98,14 @@ There are no tests. Verify changes with `yarn lint` and `yarn build`, then check
   - **Tiles** are absolutely positioned by percentage, using `<img>` with `object-cover`. The plain `<img>` is deliberate (biome-ignore'd): tiles are preloaded by exact URL, and `next/image` would fetch them again through its optimizer.
   - **Tile buttons:** each tile has a credit link (bottom-left) and a lightbox button (bottom-right). They appear on hover with a mouse and are always visible on touch screens, via `[@media(hover:hover)]:opacity-0 group-hover:opacity-100`.
   - **Lightbox:** a shadcn `Dialog` showing the photo with `object-contain`, its credit, previous/next buttons and left/right arrow keys. It shows the same Blob URL as the tile, which is already cached. `onLightboxOpenChange` tells the page to pause the slideshow.
-  - **Transitions:** the previous collage stays mounted for 700ms fading out (`.collage-leaving`), while new tiles enter one after another, staggered via the `--tile-delay` CSS variable. Each collage picks a random entry animation (`rise`, `zoom` or `slide`), passed as an inline `animationName`. The keyframes are in `app/globals.css`, and `prefers-reduced-motion` turns them off. The container is `overflow-hidden`, so sliding tiles can't cause scrollbars.
+  - **Gallery layout** (`collage.layout === 'gallery'`, `GalleryLayer`): one photo shown whole (`object-contain`) over a blurred, darkened copy of itself filling the frame, with its credit and lightbox buttons in the frame's corners.
+    - **Transitions:** each change uses one of `GALLERY_TRANSITIONS`: `fade`, `kenburns` (fade in, then a slow 20s pan and zoom while on screen), `slide`, `zoom`, `blur` or `flip`. The keyframes are in `app/globals.css`.
+    - **Crossfade:** the new photo enters on top over 1100ms (`.gallery-enter`) while the old one stays fully opaque underneath (`.gallery-leaving` has no animation). The old one is unmounted after `LEAVE_MS.gallery`. Fading both at once would dip through to the background halfway.
+  - **Collage transitions:** the previous collage stays mounted for 700ms fading out (`.collage-leaving`), while new tiles enter one after another, staggered via the `--tile-delay` CSS variable. Each collage picks a random entry animation (`rise`, `zoom` or `slide`), passed as an inline `animationName`. In both layouts the transition is never the same twice in a row (`pickDifferent`). The keyframes are in `app/globals.css`, and `prefers-reduced-motion` turns them off. The container is `overflow-hidden`, so sliding tiles can't cause scrollbars.
 - `components/ui/`: shadcn components (button, dialog, label, select, separator, sheet, skeleton, slider, switch, tabs). They're ours to edit, and two are customised:
   - `sheet.tsx`: a lighter overlay (`bg-black/30`), so background changes stay visible while the sheet is open.
   - `dialog.tsx`: a close button on a dark round background, so it stays visible over photos.
-- `components/QuoteCard.tsx`: renders the quote from `useQuote()`, with skeleton and error states. Centred over everything when quotes are on, using a `pointer-events-none` wrapper so tile buttons behind it still work.
+- `components/QuoteCard.tsx`: renders the quote from `useQuote()`. The skeleton and error state only show before the first quote; after that the current quote stays up while the next loads, and each new one fades in (keyed by its text). Centred over everything when quotes are on, using a `pointer-events-none` wrapper so tile buttons behind it still work.
 - `components/Clock.tsx`: live time, top-right next to the controls button. Loaded with `next/dynamic` and `ssr: false` to avoid hydration mismatches.
 - `components/FooterCredit.tsx`: footer (colour mode only).
 - `lib/utils.ts`: shadcn's `cn()` (clsx + tailwind-merge).
@@ -109,13 +118,13 @@ There are no tests. Verify changes with `yarn lint` and `yarn build`, then check
   - `randomColor()`: always a 6-digit hex, which the colour picker requires.
   - `PICTURES_URL` (`/api/backgrounds`), the quotes URL, `SLIDESHOW_INTERVALS` and `DEFAULT_SLIDESHOW_INTERVAL`.
   - `collageBox()`: the collage area in CSS px, the JS twin of the CSS inset.
-- `lib/collage.js`: `buildCollage(pool, boxWidth, boxHeight)`, a pure layout that's easy to stress-test from Node.
+- `lib/collage.js`: `buildCollage(pool, boxWidth, boxHeight, photoCount = 0)`, a pure layout that's easy to stress-test from Node. With `photoCount` 1–6 it uses exactly that many photos (cropping more for small counts with mostly-portrait photos on wide screens); 0 is auto.
   - **Shape:** up to `MAX_TILES` (6) photos in 1–3 rows that span the full width and together fill the full height. Within a row, photos keep their aspect ratio and the row is scaled to exactly the box width. Then all rows are stretched vertically by one shared factor to fill the height, and tiles absorb that stretch by cropping (`object-cover`).
   - **Choosing photos by aspect ratio:** it tries `ATTEMPTS` (600) random candidates, each with a random photo count and row count. Each row's last photo is the one, from a sample of 12, whose ratio best completes the row. The winner has the lowest `|ln(stretch)| + TILE_BONUS * (6 - count)`, so the least cropping, with a slight preference for more photos.
   - **Results** with the real photo set (mostly portrait) on a 1080p-sized box: 6 photos nearly always, cropping typically about 2%. All 600 attempts take about 1ms.
   - **Output:** each photo's fields plus its tile position in percent (`left`, `top`, `width`, `height`).
 - `lib/apiHelpers.js`: `useQuote()` (React Query) and `QUOTE_QUERY_KEY`. Random and Shuffle in the sheet call `queryClient.refetchQueries({ queryKey: QUOTE_QUERY_KEY })` for a new quote.
-  - **`useRandomCollage(enabled)`** returns `{ collage, next, isError }`. It fetches the `/api/backgrounds` list once and caches it for the session.
+  - **`useRandomCollage(enabled, { layout, photoCount })`** returns `{ collage, next, isError }`. It fetches the `/api/backgrounds` list once and caches it for the session. A gallery "collage" is a single tile filling the box. Changing `layout` or `photoCount` builds a new one immediately.
   - **`next()`** lays out a collage, avoiding the previous collage's photos when at least 6 others are available, and preloads every tile before swapping it in.
   - **Failures:** if any tile fails to load, that collage is discarded, the broken photos are dropped from the pool and a new collage is built automatically. After `MAX_PICTURE_FAILURES` (5) failed collages in a row it stops, so being offline doesn't cause endless retries.
   - **`isError`** is true when the list request fails, when the store is empty or every photo in it failed, or after giving up. There's no fallback photo source: the collage shows "Couldn't load pictures."

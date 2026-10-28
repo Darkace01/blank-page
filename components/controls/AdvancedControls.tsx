@@ -1,7 +1,10 @@
 'use client';
 import {
   Code2,
+  Compass,
+  GalleryHorizontal,
   Images,
+  LayoutGrid,
   Keyboard,
   type LucideIcon,
   Monitor,
@@ -52,6 +55,14 @@ const THEMES: { value: Theme; label: string; Icon: LucideIcon }[] = [
   { value: 'system', label: 'Auto', Icon: MonitorSmartphone },
 ];
 
+const PHOTO_COUNTS = [
+  { value: '0', label: 'Auto' },
+  ...[1, 2, 3, 4, 5, 6].map((n) => ({
+    value: String(n),
+    label: n === 1 ? '1 photo' : `${n} photos`,
+  })),
+];
+
 const SOUND_LABELS: Record<AmbientSound, string> = {
   off: 'Off',
   white: 'White noise',
@@ -65,6 +76,7 @@ export const SHORTCUTS = [
   ['B', 'Black screen'],
   ['H', 'Hide clock and widgets'],
   ['D', 'Developer toolkit'],
+  ['Ctrl /', 'Toolkit from anywhere (⌘ / on Mac)'],
 ] as const;
 
 function Section({
@@ -127,6 +139,7 @@ export default function AdvancedControls({
   onRandomColor,
   onShufflePictures,
   onOpenDevTools,
+  onStartTour,
   fullScreen,
   onFullScreenChange,
 }: {
@@ -134,6 +147,7 @@ export default function AdvancedControls({
   onRandomColor: () => void;
   onShufflePictures: () => void;
   onOpenDevTools: () => void;
+  onStartTour: () => void;
   fullScreen: boolean;
   onFullScreenChange: (on: boolean) => void;
 }) {
@@ -264,6 +278,42 @@ export default function AdvancedControls({
               <Shuffle /> Shuffle pictures
             </BrutalButton>
             <p className='text-sm text-brutal-muted'>{pictureStatus}</p>
+            <div className='flex gap-3'>
+              {(
+                [
+                  ['collage', <LayoutGrid key='icon' />, 'Collage'],
+                  ['gallery', <GalleryHorizontal key='icon' />, 'Gallery'],
+                ] as const
+              ).map(([layout, icon, label]) => (
+                <BrutalButton
+                  key={layout}
+                  variant={s.photoLayout === layout ? 'active' : 'light'}
+                  aria-pressed={s.photoLayout === layout}
+                  className='flex-1'
+                  onClick={() => s.setPhotoLayout(layout)}
+                >
+                  {icon} {label}
+                </BrutalButton>
+              ))}
+            </div>
+            {s.photoLayout === 'collage' ? (
+              <BrutalRow
+                htmlFor='photo-count'
+                label='Photos'
+                hint='Auto picks the best fit'
+              >
+                <BrutalSelect
+                  id='photo-count'
+                  value={String(s.photoCount)}
+                  onValueChange={(value) => s.setPhotoCount(Number(value))}
+                  options={PHOTO_COUNTS}
+                />
+              </BrutalRow>
+            ) : (
+              <p className='text-sm text-brutal-muted'>
+                One photo at a time, with a different transition each change.
+              </p>
+            )}
             <BrutalRow htmlFor='auto-change' label='Change automatically'>
               <BrutalSwitch
                 id='auto-change'
@@ -426,6 +476,9 @@ export default function AdvancedControls({
             </li>
           ))}
         </ul>
+        <BrutalButton className='w-full' onClick={onStartTour}>
+          <Compass /> Show the guide again
+        </BrutalButton>
       </Section>
 
       <Credits photos className='px-1 text-brutal-muted' />

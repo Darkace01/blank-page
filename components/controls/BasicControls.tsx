@@ -1,5 +1,5 @@
 'use client';
-import { Shuffle, Sparkles, Square } from 'lucide-react';
+import { Compass, Shuffle, Sparkles, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -29,10 +29,12 @@ function SwitchRow({
 
 // Basic mode: the original app, a colour screen with a few essentials.
 export default function BasicControls({
+  onStartTour,
   onRandomColor,
   fullScreen,
   onFullScreenChange,
 }: {
+  onStartTour: () => void;
   onRandomColor: () => void;
   fullScreen: boolean;
   onFullScreenChange: (on: boolean) => void;
@@ -107,8 +109,13 @@ export default function BasicControls({
         <p className='text-xs text-muted-foreground'>
           Tip: press <kbd className='font-mono text-foreground'>Space</kbd> for
           a random colour, <kbd className='font-mono text-foreground'>F</kbd>{' '}
-          for full screen.
+          for full screen,{' '}
+          <kbd className='font-mono text-foreground'>Ctrl /</kbd> for the
+          developer toolkit.
         </p>
+        <Button variant='outline' size='sm' className='w-full' onClick={onStartTour}>
+          <Compass /> Show the guide again
+        </Button>
 
         <Separator />
 

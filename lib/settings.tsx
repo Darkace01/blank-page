@@ -12,6 +12,8 @@ export type BgMode = 'color' | 'picture';
 export type AmbientSound = 'off' | 'white' | 'pink' | 'brown';
 // Advanced mode's look; 'system' follows the device's light/dark setting.
 export type Theme = 'light' | 'dark' | 'system';
+// Collage: several photos at once. Gallery: one photo at a time.
+export type PhotoLayout = 'collage' | 'gallery';
 
 const isHexColor = (value: unknown) =>
   typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
@@ -39,6 +41,17 @@ export function useSettingsState() {
     'bgMode',
     'color',
     (value) => value === 'color' || value === 'picture',
+  );
+  const [photoLayout, setPhotoLayout] = usePersistentState<PhotoLayout>(
+    'photoLayout',
+    'collage',
+    (value) => value === 'collage' || value === 'gallery',
+  );
+  // Photos per collage: 1-6, or 0 for "auto" (whatever fits best, up to 6).
+  const [photoCount, setPhotoCount] = usePersistentState(
+    'photoCount',
+    0,
+    (value) => Number.isInteger(value) && isNumberBetween(0, 6)(value),
   );
   const [crazyMode, setCrazyMode] = usePersistentState('crazyMode', false);
   const [crazyModeInterval, setCrazyModeInterval] = usePersistentState(
@@ -87,6 +100,10 @@ export function useSettingsState() {
     setShowClock,
     bgMode,
     setBgMode,
+    photoLayout,
+    setPhotoLayout,
+    photoCount,
+    setPhotoCount,
     crazyMode,
     setCrazyMode,
     crazyModeInterval,
